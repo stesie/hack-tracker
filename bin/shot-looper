@@ -1,0 +1,29 @@
+#! /bin/bash
+reso_state=""
+first=1
+
+for filename in $*; do
+	scraped=$("${0%/*}/shot-scraper" "$filename" 2>/dev/null)
+
+	if [ "$scraped" = "" ]; then
+		# data not understood, reset state
+		reso_state=""
+	fi
+
+	if echo "$scraped" | grep -qe "object:"; then
+		if [ "$first" -eq 1 ]; then
+			echo -n "["
+			first=0
+		else
+			echo ","
+		fi
+
+		echo -n "{ resos: $reso_state, items: $scraped }"
+	else
+		reso_state="$scraped"
+	fi
+done
+
+if [ "$first" -ne 1 ]; then
+	echo "]"
+fi

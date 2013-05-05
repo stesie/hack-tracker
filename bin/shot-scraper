@@ -1,0 +1,205 @@
+#! /bin/bash
+
+if [ \! -e "$1" ]; then
+	echo "shot-scraper: File does not exist: $1" 1>&2
+	exit 2
+fi
+
+filename="$1"; shift;
+
+log() {
+	message="$1"; shift;
+	echo "$filename: $message" 1>&2
+}
+
+error() {
+	message="$1"; shift;
+	echo "$filename: $message" 1>&2
+
+	if [ "$tempFile" != "" ]; then
+		rm -f "$tempFile" "$tempFile.txt"
+	fi
+
+	exit 2
+}
+
+set -- `identify -format "%w %h" "$filename"`
+imgWidth="$1"; shift;
+imgHeight="$1"; shift;
+log "detected image size: $imgWidth x $imgHeight pixels"
+
+case "$imgWidth"x"$imgHeight" in
+	768x1280 )
+		# "Items acquired" string is positioned dynamically, if just one item
+		# is acquired, then it is roughly at 578x80+96+486.
+		# If three items are acquired, it's about 578x80+96+402
+		resultsLeft=$[$imgWidth * 12 / 100]
+		resultsWidth=$[$imgWidth * 75 / 100]
+		resultsHeadTop=$[$imgHeight * 38 / 100]
+		resultsHeadTopOffset=$[$imgHeight * 7 / 100]
+		resultsHeadHeight=$[$imgHeight * 6 / 100]
+
+		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
+		resultsListBottom=$[$imgHeight * 75 / 100]
+
+		# energy string
+		energyWidth=$[$imgWidth * 25 / 100]
+		energyHeight=$[$imgHeight * 4 / 100]
+		energyLeft=$[$imgWidth * 57 / 100]
+		energyTop=$[$imgHeight * 12 / 100]
+
+		# reso list positions
+		resoListWidth=$[$imgWidth * 8 / 100]
+		resoListHeight=$[$imgHeight * 3 / 100]
+
+		resoListLeft=$[$imgWidth * 12 / 100]
+		resoListOffset=$[$imgWidth * 8 / 100]
+		resoListTop=$[$imgHeight * 51 / 100]
+		resoListTop2=$[$imgHeight * 69 / 100]
+		;;
+
+	*)
+		error "unsupported image resolution"
+		break;;
+esac
+
+tempFile="`mktemp`.jpg"
+log "using temporary file $tempFile"
+
+convertOpts=""
+
+# Remove dark background stuff
+convertOpts="$convertOpts -fill black -fuzz 40% -opaque black"
+
+# Remove turquois resonator lines
+convertOpts="$convertOpts -fill black -fuzz 10% -opaque rgb(25,121,181) -strip "
+
+# Convert colored text to white
+convertOpts="$convertOpts -fill white -fuzz 20% -opaque hsl(310,100,100)"	# ~L6
+convertOpts="$convertOpts -fill white -fuzz 20% -opaque hsl(0,100,100)"		# ~L4
+
+
+#
+# handle "portal info" page
+# we handle it first, since "items acquired" requires some scanning, making it more expensive
+#
+convert "$filename" -crop "$energyWidth"x"$energyHeight"+$energyLeft+$energyTop "$tempFile"
+tesseract "$tempFile" "$tempFile" -psm 7 > /dev/null
+
+getReso() {
+	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$1+$2 $convertOpts  "$tempFile"
+	tesseract "$tempFile" "$tempFile" -psm 7 ingress > /dev/null || return 0
+	#cat "$tempFile.txt"; eog "$tempFile"
+
+	level=`perl -ne 'if(m/^L([1-8])/) { print $1 }' < "$tempFile.txt"`
+	[ "$level" = "" ] && error "resonator level not readable"
+
+	resoList="$level $resoList"
+}
+
+if grep -qe "Energy" "$tempFile.txt"; then
+	log "detected 'portal info' page"
+	resoList=""
+
+	for offset in 0 1 2 3; do
+		getReso $[$resoListLeft + $resoListOffset * $offset] $resoListTop
+		getReso $[$resoListLeft + $resoListOffset * $offset] $resoListTop2
+	done
+
+	set -- $resoList
+	echo -n "[ $1"; shift
+
+	for level in $*; do
+		echo -n ", $1"; shift
+	done
+	echo "]"
+
+	rm -f "$tempFile" "$tempFile.txt"
+	exit 0
+fi
+
+
+
+#
+# handle "items acquired" page
+#
+convertOpts=""
+
+# Remove dark background stuff
+convertOpts="$convertOpts -fill black -fuzz 40% -opaque black"
+
+for offset in `seq 0 9`; do
+	resultsListTop=$[$resultsHeadTop - $resultsHeadTopOffset * $offset / 2]
+	convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
+	tesseract "$tempFile" "$tempFile" > /dev/null
+	#cat "$tempFile.txt"; eog "$tempFile"
+
+	if grep -qe "Items acquired" "$tempFile.txt"; then
+		log "detected 'items acquired' page at offset $offset"
+
+		first=1
+		echo -n "["
+
+		while [ $[$resultsListTop + $resultsHeadHeight] -lt $resultsListBottom ]; do
+			resultsListTop=$[$resultsListTop + $resultsHeadTopOffset]
+			resultsListHeight=$[$resultsListBottom - $resultsListTop]
+
+			convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
+			tesseract "$tempFile" "$tempFile" > /dev/null
+			read a b c d < "$tempFile.txt"
+			#eog "$tempFile"
+
+			if [ "$a" = "" ]; then
+				break
+			fi
+
+			if [ $first -ne 1 ]; then
+				echo -n ", "
+			else
+				first=0
+			fi
+
+			object=$b
+			case $a in
+			L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8)
+				if [ "$b" = "Resonator" ]; then
+					quantity=$c
+				elif [ "$b" = "Xmp" ]; then
+					quantity=$d
+				else
+					error "parse error"
+				fi
+
+				level=${a#L}
+				;;
+
+			Portal)
+				quantity=$c
+				level=0
+				;;
+
+			*)
+				error "parse error, unknown a=$a b=$b";;
+			esac
+
+			if [ "$quantity" = "" ]; then
+				quantity=1
+			else
+				quantity=${quantity#(}
+				quantity=${quantity%)}
+			fi
+
+			echo -n "{ object: \"$object\", level: ${level#L}, quantity: $quantity }"
+		done
+
+		echo "]";
+
+		rm -f "$tempFile" "$tempFile.txt"
+		exit 0
+	fi
+done
+
+
+rm -f "$tempFile" "$tempFile.txt"
+error "unsupported page type"
+ln $filename unsupported/
