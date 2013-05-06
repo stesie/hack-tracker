@@ -78,6 +78,8 @@ convertOpts="$convertOpts -fill black -fuzz 10% -opaque rgb(25,121,181) -strip "
 convertOpts="$convertOpts -fill white -fuzz 20% -opaque hsl(310,100,100)"	# ~L6
 convertOpts="$convertOpts -fill white -fuzz 20% -opaque hsl(0,100,100)"		# ~L4
 
+emptyOpts="-fuzz 3% -transparent rgb(16,31,34) -transparent rgb(8,20,16) -transparent rgb(25,105,156) -trim"
+
 
 #
 # handle "portal info" page
@@ -87,12 +89,27 @@ convert "$filename" -crop "$energyWidth"x"$energyHeight"+$energyLeft+$energyTop 
 tesseract "$tempFile" "$tempFile" -psm 7 > /dev/null
 
 getReso() {
-	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$1+$2 $convertOpts  "$tempFile"
+	offsetX=$1; shift;
+	offsetY=$1; shift;
+
+	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $emptyOpts "$tempFile" 2>/dev/null
+	set -- `identify -format "%w %h" "$tempFile"`
+
+	if [ "$1" = "1" -a "$2" = "1" ]; then
+		log "empty resonator slot found"
+		resoList="0 $resoList"
+		return
+	fi
+
+	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $convertOpts "$tempFile"
 	tesseract "$tempFile" "$tempFile" -psm 7 ingress > /dev/null || return 0
 	#cat "$tempFile.txt"; eog "$tempFile"
 
 	level=`perl -ne 'if(m/^L([1-8])/) { print $1 }' < "$tempFile.txt"`
-	[ "$level" = "" ] && error "resonator level not readable"
+	[ "$level" = "" ] && {
+		#eog "$tempFile"
+		error "resonator level not readable"
+	}
 
 	resoList="$level $resoList"
 }
