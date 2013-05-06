@@ -128,6 +128,68 @@ convertOpts=""
 # Remove dark background stuff
 convertOpts="$convertOpts -fill black -fuzz 40% -opaque black"
 
+scrapeResults() {
+	first=1
+	echo -n "{ type: \"$1\", items: ["
+
+	while [ $[$resultsListTop + $resultsHeadHeight] -lt $resultsListBottom ]; do
+		resultsListTop=$[$resultsListTop + $resultsHeadTopOffset]
+		resultsListHeight=$[$resultsListBottom - $resultsListTop]
+
+		convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
+		tesseract "$tempFile" "$tempFile" > /dev/null
+		read a b c d < "$tempFile.txt"
+		#eog "$tempFile"
+
+		if [ "$a" = "" ]; then
+			break
+		fi
+
+		if [ $first -ne 1 ]; then
+			echo -n ", "
+		else
+			first=0
+		fi
+
+		object=$b
+		case $a in
+		L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8)
+			if [ "$b" = "Resonator" ]; then
+				quantity=$c
+			elif [ "$b" = "Xmp" ]; then
+				quantity=$d
+			else
+				error "parse error"
+			fi
+
+			level=${a#L}
+			;;
+
+		Portal)
+			quantity=$c
+			level=0
+			;;
+
+		*)
+			error "parse error, unknown a=$a b=$b";;
+		esac
+
+		if [ "$quantity" = "" ]; then
+			quantity=1
+		else
+			quantity=${quantity#(}
+			quantity=${quantity%)}
+		fi
+
+		echo -n "{ object: \"$object\", level: ${level#L}, quantity: $quantity }"
+	done
+
+	echo "]}";
+
+	rm -f "$tempFile" "$tempFile.txt"
+	exit 0
+}
+
 for offset in `seq 0 9`; do
 	resultsListTop=$[$resultsHeadTop - $resultsHeadTopOffset * $offset / 2]
 	convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
@@ -136,66 +198,10 @@ for offset in `seq 0 9`; do
 
 	if grep -qe "Items acquired" "$tempFile.txt"; then
 		log "detected 'items acquired' page at offset $offset"
-
-		first=1
-		echo -n "["
-
-		while [ $[$resultsListTop + $resultsHeadHeight] -lt $resultsListBottom ]; do
-			resultsListTop=$[$resultsListTop + $resultsHeadTopOffset]
-			resultsListHeight=$[$resultsListBottom - $resultsListTop]
-
-			convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
-			tesseract "$tempFile" "$tempFile" > /dev/null
-			read a b c d < "$tempFile.txt"
-			#eog "$tempFile"
-
-			if [ "$a" = "" ]; then
-				break
-			fi
-
-			if [ $first -ne 1 ]; then
-				echo -n ", "
-			else
-				first=0
-			fi
-
-			object=$b
-			case $a in
-			L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8)
-				if [ "$b" = "Resonator" ]; then
-					quantity=$c
-				elif [ "$b" = "Xmp" ]; then
-					quantity=$d
-				else
-					error "parse error"
-				fi
-
-				level=${a#L}
-				;;
-
-			Portal)
-				quantity=$c
-				level=0
-				;;
-
-			*)
-				error "parse error, unknown a=$a b=$b";;
-			esac
-
-			if [ "$quantity" = "" ]; then
-				quantity=1
-			else
-				quantity=${quantity#(}
-				quantity=${quantity%)}
-			fi
-
-			echo -n "{ object: \"$object\", level: ${level#L}, quantity: $quantity }"
-		done
-
-		echo "]";
-
-		rm -f "$tempFile" "$tempFile.txt"
-		exit 0
+		scrapeResults "friendly"
+	elif grep -qe "Hack successful" "$tempFile.txt"; then
+		log "detected 'hack successful' page at offset $offset"
+		scrapeResults "enemy"
 	fi
 done
 
