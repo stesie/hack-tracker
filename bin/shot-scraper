@@ -175,8 +175,11 @@ scrapeResults() {
 				quantity=$c
 			elif [ "$b" = "Xmp" ]; then
 				quantity=$d
+			elif [ "$b" = "Power" ]; then
+				quantity=$d
+				object="Cube"
 			else
-				error "parse error"
+				error "parse error, unknown b=$b"
 			fi
 
 			level=${a#L}
