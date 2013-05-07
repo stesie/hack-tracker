@@ -14,7 +14,7 @@ for filename in $*; do
 
 	if echo "$scraped" | grep -qe "object"; then
 		if [ "$first" -eq 1 ]; then
-			echo -n "["
+			echo "{ \"docs\": ["
 			first=0
 		else
 			echo ","
@@ -33,5 +33,6 @@ for filename in $*; do
 done
 
 if [ "$first" -ne 1 ]; then
-	echo "]"
+	echo ""
+	echo "]}"
 fi
