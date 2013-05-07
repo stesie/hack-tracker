@@ -13,6 +13,8 @@ for filename in $*; do
 	fi
 
 	if echo "$scraped" | grep -qe "object"; then
+		if [ "$reso_state" = "" ]; then continue; fi
+
 		if [ "$first" -eq 1 ]; then
 			echo "{ \"docs\": ["
 			first=0
