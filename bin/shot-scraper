@@ -95,7 +95,7 @@ getReso() {
 	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $emptyOpts "$tempFile" 2>/dev/null
 	set -- `identify -format "%w %h" "$tempFile"`
 
-	if [ "$1" = "1" -a "$2" = "1" ]; then
+	if [ "$1" -lt "5" -o "$2" -lt "5" ]; then
 		log "empty resonator slot found"
 		resoList="0 $resoList"
 		return
