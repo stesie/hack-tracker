@@ -5,14 +5,14 @@ reso_state=""
 first=1
 
 for filename in $*; do
-	scraped=$("${0%/*}/shot-scraper" "$filename" 2>/dev/null)
+	scraped=$("${0%/*}/shot-scraper" "$filename") || scraped=""
 
 	if [ "$scraped" = "" ]; then
 		# data not understood, reset state
 		reso_state=""
 	fi
 
-	if echo "$scraped" | grep -qe "object:"; then
+	if echo "$scraped" | grep -qe "object"; then
 		if [ "$first" -eq 1 ]; then
 			echo -n "["
 			first=0
@@ -20,7 +20,13 @@ for filename in $*; do
 			echo ","
 		fi
 
-		echo -n "{ resos: $reso_state, hacker: { name: \"$hacker_name\", level: $hacker_level }, hack: $scraped }"
+		datetime="`perl -e '$_ = shift @ARGV; if(m/Screenshot_(201\d-\d\d-\d\d)-(\d\d)-(\d\d)-(\d\d).png/) { print "$1 $2:$3:$4" };' -- \"${filename##*/}\" `"
+
+		if [ "$datetime" != "" ]; then
+			stamp=", \"timestamp\": `date +%s -d \"$datetime\"`"
+		fi
+
+		echo -n "{ \"resos\": $reso_state, \"hacker\": { \"name\": \"$hacker_name\", \"level\": $hacker_level }, \"hack\": $scraped$stamp, \"source\": \"${filename##*/}\" }"
 	else
 		reso_state="$scraped"
 	fi

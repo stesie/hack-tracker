@@ -147,7 +147,7 @@ convertOpts="$convertOpts -fill black -fuzz 40% -opaque black"
 
 scrapeResults() {
 	first=1
-	echo -n "{ type: \"$1\", items: ["
+	echo -n "{ \"type\": \"$1\", \"items\": ["
 
 	while [ $[$resultsListTop + $resultsHeadHeight] -lt $resultsListBottom ]; do
 		resultsListTop=$[$resultsListTop + $resultsHeadTopOffset]
@@ -201,7 +201,7 @@ scrapeResults() {
 			quantity=${quantity%)}
 		fi
 
-		echo -n "{ object: \"$object\", level: ${level#L}, quantity: $quantity }"
+		echo -n "{ \"object\": \"$object\", \"level\": ${level#L}, \"quantity\": $quantity }"
 	done
 
 	echo "]}";
