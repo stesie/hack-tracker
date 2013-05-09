@@ -56,6 +56,43 @@ case "$imgWidth"x"$imgHeight" in
 		resoListOffset=$[$imgWidth * 8 / 100]
 		resoListTop=$[$imgHeight * 51 / 100]
 		resoListTop2=$[$imgHeight * 69 / 100]
+
+		portalLevelLeft=684
+		portalLevelTop=64
+		portalLevelWidth=70
+		portalLevelHeight=58
+
+		;;
+
+	480x800 )
+		resultsLeft=$[$imgWidth * 12 / 100]
+		resultsWidth=$[$imgWidth * 75 / 100]
+		resultsHeadTop=$[$imgHeight * 38 / 100]
+		resultsHeadTopOffset=$[$imgHeight * 7 / 100]
+		resultsHeadHeight=$[$imgHeight * 6 / 100]
+
+		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
+		resultsListBottom=$[$imgHeight * 75 / 100]
+
+		# energy string
+		energyWidth=84
+		energyHeight=30
+		energyLeft=283
+		energyTop=119
+
+		# reso list positions
+		resoListWidth=43
+		resoListHeight=27
+
+		resoListLeft=51
+		resoListOffset=47
+		resoListTop=405
+		resoListTop2=582
+
+		portalLevelLeft=407
+		portalLevelTop=57
+		portalLevelWidth=52
+		portalLevelHeight=38
 		;;
 
 	*)
@@ -66,17 +103,17 @@ esac
 tempFile="`mktemp`.jpg"
 log "using temporary file $tempFile"
 
-convertOpts=""
+convertOpts="-quality 100%"
 
 # Remove dark background stuff
-convertOpts="$convertOpts -fill black -fuzz 40% -opaque black"
+convertOpts="$convertOpts -contrast"
+convertOpts="$convertOpts -fill black -fuzz 45% -opaque black"
 
 # Remove turquois resonator lines
 convertOpts="$convertOpts -fill black -fuzz 10% -opaque rgb(25,121,181) -strip "
 
-# Convert colored text to white
-convertOpts="$convertOpts -fill white -fuzz 20% -opaque hsl(310,100,100)"	# ~L6
-convertOpts="$convertOpts -fill white -fuzz 20% -opaque hsl(0,100,100)"		# ~L4
+#convertOpts="$convertOpts -sharpen 0x1.0"
+convertOpts="$convertOpts -contrast"
 
 emptyOpts="-fuzz 3% -transparent rgb(16,31,34) -transparent rgb(8,20,16) -transparent rgb(25,105,156) -trim"
 
@@ -86,6 +123,7 @@ emptyOpts="-fuzz 3% -transparent rgb(16,31,34) -transparent rgb(8,20,16) -transp
 # we handle it first, since "items acquired" requires some scanning, making it more expensive
 #
 convert "$filename" -crop "$energyWidth"x"$energyHeight"+$energyLeft+$energyTop "$tempFile"
+#eog "$tempFile"
 tesseract "$tempFile" "$tempFile" -psm 7 > /dev/null
 
 getReso() {
@@ -112,16 +150,42 @@ getReso() {
 	}
 
 	resoList="$level $resoList"
+	resoTotal=$[$resoTotal + $level]
 }
 
 if grep -qe "Energy" "$tempFile.txt"; then
 	log "detected 'portal info' page"
 	resoList=""
+	resoTotal=0
 
 	for offset in 0 1 2 3; do
 		getReso $[$resoListLeft + $resoListOffset * $offset] $resoListTop
 		getReso $[$resoListLeft + $resoListOffset * $offset] $resoListTop2
 	done
+
+	convert "$filename" -crop "$portalLevelWidth"x"$portalLevelHeight"+$portalLevelLeft+$portalLevelTop $convertOpts "$tempFile"
+	tesseract "$tempFile" "$tempFile" -psm 7 ingress > /dev/null || return 0
+	#cat "$tempFile.txt"; eog "$tempFile"
+
+	level=`perl -ne 'if(m/^L([1-8])/) { print $1 }' < "$tempFile.txt"`
+	[ "$level" = "" ] && {
+		#eog "$tempFile"
+		error "portal level not readable"
+	}
+
+	if [ $resoTotal -eq 0 ]; then
+		expectPortalLevel=1
+	else
+		expectPortalLevel=$[$resoTotal / 8]
+	fi
+
+	#echo $resoTotal
+	#echo $expectPortalLevel
+	#echo $level
+
+	if [ $level -ne $expectPortalLevel ]; then
+		error "calculated portal level mismatches actual portal level"
+	fi
 
 	set -- $resoList
 	echo -n "[ $1"; shift
