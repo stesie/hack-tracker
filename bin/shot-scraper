@@ -291,6 +291,10 @@ for offset in `seq 0 9`; do
 	elif grep -qe "Hack successful" "$tempFile.txt"; then
 		log "detected 'hack successful' page at offset $offset"
 		scrapeResults "enemy"
+	elif grep -qe "Portal running hot" "$tempFile.txt"; then
+		log "Portal running hot"
+		rm -f "$tempFile" "$tempFile.txt"
+		exit 0
 	fi
 done
 
