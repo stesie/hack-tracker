@@ -4,7 +4,7 @@ hacker_level=$1; shift;
 reso_state=""
 first=1
 
-for filename in $*; do
+while filename="$1"; shift; do
 	scraped=$("${0%/*}/shot-scraper" "$filename") || scraped=""
 
 	if [ "$scraped" = "" ]; then
@@ -22,13 +22,20 @@ for filename in $*; do
 			echo ","
 		fi
 
-		datetime="`perl -e '$_ = shift @ARGV; if(m/Screenshot_(201\d-\d\d-\d\d)-(\d\d)-(\d\d)-(\d\d).png/) { print "$1 $2:$3:$4" };' -- \"${filename##*/}\" `"
+		datetime="`perl -e '$_ = shift @ARGV;
+		if(m/Screenshot_(201\d-\d\d-\d\d)-(\d\d)-(\d\d)-(\d\d).\png/) {
+			print "$1 $2:$3:$4"
+		} elsif(m/(201\d-\d\d-\d\d) (\d\d)\.(\d\d)\.(\d\d)\.png/) {
+			print "$1 $2:$3:$4"
+		}' -- \"${filename##*/}\" `"
 
-		if [ "$datetime" != "" ]; then
-			stamp=", \"timestamp\": `date +%s -d \"$datetime\"`"
+		if [ "$datetime" = "" ]; then
+			echo "unable to parse timestamp from filename: $filename" 1>&2
+			continue
 		fi
 
-		echo -n "{ \"resos\": $reso_state, \"hacker\": { \"name\": \"$hacker_name\", \"level\": $hacker_level }, \"hack\": $scraped$stamp, \"source\": \"${filename##*/}\" }"
+		stamp="`date +%s -d \"$datetime\"`"
+		echo -n "{ \"_id\": \"$hacker_name-$stamp\", \"resos\": $reso_state, \"hacker\": { \"name\": \"$hacker_name\", \"level\": $hacker_level }, \"hack\": $scraped, \"timestamp\": $stamp, \"source\": \"${filename##*/}\" }"
 	else
 		reso_state="$scraped"
 	fi
