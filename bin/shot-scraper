@@ -65,14 +65,12 @@ case "$imgWidth"x"$imgHeight" in
 		;;
 
 	480x800 )
-		resultsLeft=$[$imgWidth * 12 / 100]
-		resultsWidth=$[$imgWidth * 75 / 100]
-		resultsHeadTop=$[$imgHeight * 38 / 100]
-		resultsHeadTopOffset=$[$imgHeight * 7 / 100]
-		resultsHeadHeight=$[$imgHeight * 6 / 100]
-
-		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
-		resultsListBottom=$[$imgHeight * 75 / 100]
+		resultsLeft=64
+		resultsWidth=348
+		resultsHeadTop=318
+		resultsHeadTopOffset=75
+		resultsHeadHeight=60
+		resultsListBottom=633
 
 		# energy string
 		energyWidth=84
@@ -204,10 +202,12 @@ fi
 #
 # handle "items acquired" page
 #
-convertOpts=""
+convertOpts="-quality 100%"
 
 # Remove dark background stuff
-convertOpts="$convertOpts -fill black -fuzz 40% -opaque black"
+convertOpts="$convertOpts -contrast"
+convertOpts="$convertOpts -fill black -fuzz 45% -opaque black"
+convertOpts="$convertOpts -contrast"
 
 scrapeResults() {
 	first=1
@@ -218,7 +218,8 @@ scrapeResults() {
 		resultsListHeight=$[$resultsListBottom - $resultsListTop]
 
 		convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
-		tesseract "$tempFile" "$tempFile" > /dev/null
+		tesseract "$tempFile" "$tempFile" ingress-items > /dev/null
+		sed -i -e 's/-[0-9]%//' "$tempFile.txt"
 		read a b c d < "$tempFile.txt"
 		#eog "$tempFile"
 
@@ -230,6 +231,10 @@ scrapeResults() {
 			echo -n ", "
 		else
 			first=0
+		fi
+
+		if [ "$a" = "LI" -o "$a" = "Ll" ]; then
+			a="L1"
 		fi
 
 		object=$b
