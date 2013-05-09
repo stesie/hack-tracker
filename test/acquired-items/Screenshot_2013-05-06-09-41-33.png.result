@@ -1,1 +1,1 @@
-{ type: "enemy", items: [{ object: "Resonator", level: 2, quantity: 1 }]}
+{ "type": "enemy", "items": [{ "object": "Resonator", "level": 2, "quantity": 1 }]}

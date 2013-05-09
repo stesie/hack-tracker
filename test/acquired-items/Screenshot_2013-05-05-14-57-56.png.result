@@ -1,1 +1,1 @@
-{ type: "friendly", items: [{ object: "Resonator", level: 6, quantity: 1 }, { object: "Key", level: 0, quantity: 1 }]}
+{ "type": "friendly", "items": [{ "object": "Resonator", "level": 6, "quantity": 1 }, { "object": "Key", "level": 0, "quantity": 1 }]}
