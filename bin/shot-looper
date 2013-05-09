@@ -12,7 +12,7 @@ while filename="$1"; shift; do
 		reso_state=""
 	fi
 
-	if echo "$scraped" | grep -qe "object"; then
+	if echo "$scraped" | grep -qe "items"; then
 		if [ "$reso_state" = "" ]; then continue; fi
 
 		if [ "$first" -eq 1 ]; then

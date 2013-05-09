@@ -35,8 +35,8 @@ case "$imgWidth"x"$imgHeight" in
 		# If three items are acquired, it's about 578x80+96+402
 		resultsLeft=$[$imgWidth * 12 / 100]
 		resultsWidth=$[$imgWidth * 75 / 100]
-		resultsHeadTop=$[$imgHeight * 38 / 100]
-		resultsHeadTopOffset=$[$imgHeight * 7 / 100]
+		resultsHeadTop=530
+		resultsHeadTopOffset=89
 		resultsHeadHeight=$[$imgHeight * 6 / 100]
 
 		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
@@ -291,6 +291,11 @@ for offset in `seq 0 9`; do
 	elif grep -qe "Hack successful" "$tempFile.txt"; then
 		log "detected 'hack successful' page at offset $offset"
 		scrapeResults "enemy"
+	elif grep -qe "Hack acqu" "$tempFile.txt"; then		# only short phrase, since red -x% likely at the right hand side
+		log "hack failed"
+		echo -n "{ \"type\": \"enemy\", \"items\": [] }"
+		rm -f "$tempFile" "$tempFile.txt"
+		exit 0
 	elif grep -qe "Portal running hot" "$tempFile.txt"; then
 		log "Portal running hot"
 		rm -f "$tempFile" "$tempFile.txt"
