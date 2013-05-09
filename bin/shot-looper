@@ -23,7 +23,7 @@ while filename="$1"; shift; do
 		fi
 
 		datetime="`perl -e '$_ = shift @ARGV;
-		if(m/Screenshot_(201\d-\d\d-\d\d)-(\d\d)-(\d\d)-(\d\d).\png/) {
+		if(m/Screenshot_(201\d-\d\d-\d\d)-(\d\d)-(\d\d)-(\d\d)\.png/) {
 			print "$1 $2:$3:$4"
 		} elsif(m/(201\d-\d\d-\d\d) (\d\d)\.(\d\d)\.(\d\d)\.png/) {
 			print "$1 $2:$3:$4"
