@@ -263,12 +263,8 @@ scrapeResults() {
 			error "parse error, unknown a=$a b=$b";;
 		esac
 
-		if [ "$quantity" = "" ]; then
-			quantity=1
-		else
-			quantity=${quantity#(}
-			quantity=${quantity%)}
-		fi
+		quantity="`perl -e '$_ = shift @ARGV;
+			if(m/\((\d)\)/) { print $1 } else { print 1 }' -- "$quantity"`"
 
 		echo -n "{ \"object\": \"$object\", \"level\": ${level#L}, \"quantity\": $quantity }"
 	done
