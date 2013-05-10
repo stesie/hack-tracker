@@ -38,7 +38,7 @@ while filename="$1"; shift; do
 		fi
 
 		if [ $multihack_stamp -gt 0 ]; then
-			if [ $[$stamp - $multihack_stamp] -lt 10 ]; then
+			if [ $[$stamp - $multihack_stamp] -lt 20 ]; then
 				multihack=$[$multihack + 1]
 			else
 				multihack=0
