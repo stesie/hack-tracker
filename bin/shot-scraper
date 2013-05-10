@@ -208,6 +208,9 @@ fi
 #
 convertOpts="-quality 100%"
 
+# Remove red stuff from the right half of the screen (i.e. stuff like -3%)
+convertOpts="$convertOpts ( +clone -crop "$[$imgWidth / 2]"x$imgHeight+"$[$imgWidth / 2]"+0  -fill black -fuzz 45% -opaque red ) -layers flatten"
+
 # Remove dark background stuff
 convertOpts="$convertOpts -contrast"
 convertOpts="$convertOpts -fill black -fuzz 45% -opaque black"
@@ -221,9 +224,9 @@ scrapeResults() {
 		resultsListTop=$[$resultsListTop + $resultsHeadTopOffset]
 		resultsListHeight=$[$resultsListBottom - $resultsListTop]
 
-		convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
+		convert "$filename" $convertOpts -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop "$tempFile"
 		tesseract "$tempFile" "$tempFile" ingress-items > /dev/null
-		sed -i -e 's/°\/0/%/' -e 's/-[0-9]%//' "$tempFile.txt"
+		sed -i -e 's/°\/0/%/'  -e 's/°\/c/%/'  -e 's/-[0-9]%//' "$tempFile.txt"
 		read a b c d < "$tempFile.txt"
 		#cat "$tempFile.txt"; eog "$tempFile"
 
@@ -271,8 +274,15 @@ scrapeResults() {
 				;;
 			esac
 
-			quantity="`perl -e '$_ = shift @ARGV;
-				if(m/\((\d)\)/) { print $1 } else { print 1 }' -- "$quantity"`"
+			if [ "$quantity" = "" ]; then
+				quantity=1
+			else
+				quantity="`perl -e '$_ = shift @ARGV;
+					if(m/\((\d)\)/) { print $1 } else { print 0 }' -- "$quantity"`"
+				if [ $quantity -eq 0 ]; then
+					error "failed to parse quantity=$quantity"
+				fi
+			fi
 		fi
 
 		if [ $first -ne 1 ]; then
@@ -292,7 +302,7 @@ scrapeResults() {
 
 for offset in `seq 0 9`; do
 	resultsListTop=$[$resultsHeadTop - $resultsHeadTopOffset * $offset / 2]
-	convert "$filename" -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop $convertOpts "$tempFile"
+	convert "$filename" $convertOpts -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop "$tempFile"
 	tesseract "$tempFile" "$tempFile" > /dev/null
 	#cat "$tempFile.txt"; eog "$tempFile"
 
