@@ -240,7 +240,7 @@ scrapeResults() {
 
 		if grep -qe "OPEN" -e "Report" -- "$tempFile.txt"; then
 			object="Media"
-			level=1
+			level=0
 			quantity=1
 		else
 			object=$b
