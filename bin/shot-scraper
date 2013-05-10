@@ -7,6 +7,10 @@ fi
 
 filename="$1"; shift;
 
+debug() {
+	true
+}
+
 log() {
 	message="$1"; shift;
 	echo "$filename: $message" 1>&2
@@ -26,7 +30,7 @@ error() {
 set -- `identify -format "%w %h" "$filename"`
 imgWidth="$1"; shift;
 imgHeight="$1"; shift;
-log "detected image size: $imgWidth x $imgHeight pixels"
+debug "detected image size: $imgWidth x $imgHeight pixels"
 
 case "$imgWidth"x"$imgHeight" in
 	768x1280 )
@@ -99,7 +103,7 @@ case "$imgWidth"x"$imgHeight" in
 esac
 
 tempFile="`mktemp`.jpg"
-log "using temporary file $tempFile"
+debug "using temporary file $tempFile"
 
 convertOpts="-quality 100%"
 
@@ -152,7 +156,7 @@ getReso() {
 }
 
 if grep -qe "Energy" "$tempFile.txt"; then
-	log "detected 'portal info' page"
+	debug "detected 'portal info' page"
 	resoList=""
 	resoTotal=0
 
@@ -221,10 +225,54 @@ scrapeResults() {
 		tesseract "$tempFile" "$tempFile" ingress-items > /dev/null
 		sed -i -e 's/°\/0/%/' -e 's/-[0-9]%//' "$tempFile.txt"
 		read a b c d < "$tempFile.txt"
-		#eog "$tempFile"
+		#cat "$tempFile.txt"; eog "$tempFile"
 
 		if [ "$a" = "" ]; then
 			break
+		fi
+
+		if [ "$a" = "LI" -o "$a" = "Ll" ]; then
+			a="L1"
+		fi
+
+		if grep -qe "OPEN" -e "Report" -- "$tempFile.txt"; then
+			object="Media"
+			level=1
+			quantity=1
+		else
+			object=$b
+
+			test "$b" = "Key" && a=Portal
+			test "$b" = "Shield" && a=Portal
+
+			case $a in
+			L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8)
+				if [ "$b" = "Resonator" ]; then
+					quantity=$c
+				elif [ "$b" = "Xmp" ]; then
+					quantity=$d
+				elif [ "$b" = "Power" ]; then
+					quantity=$d
+					object="Cube"
+				else
+					error "parse error, unknown b=$b"
+				fi
+
+				level=${a#L}
+				;;
+
+			Portal)
+				quantity=$c
+				level=0
+				;;
+
+			*)
+				error "parse error, unknown a=$a b=$b"
+				;;
+			esac
+
+			quantity="`perl -e '$_ = shift @ARGV;
+				if(m/\((\d)\)/) { print $1 } else { print 1 }' -- "$quantity"`"
 		fi
 
 		if [ $first -ne 1 ]; then
@@ -232,39 +280,6 @@ scrapeResults() {
 		else
 			first=0
 		fi
-
-		if [ "$a" = "LI" -o "$a" = "Ll" ]; then
-			a="L1"
-		fi
-
-		object=$b
-		case $a in
-		L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8)
-			if [ "$b" = "Resonator" ]; then
-				quantity=$c
-			elif [ "$b" = "Xmp" ]; then
-				quantity=$d
-			elif [ "$b" = "Power" ]; then
-				quantity=$d
-				object="Cube"
-			else
-				error "parse error, unknown b=$b"
-			fi
-
-			level=${a#L}
-			;;
-
-		Portal)
-			quantity=$c
-			level=0
-			;;
-
-		*)
-			error "parse error, unknown a=$a b=$b";;
-		esac
-
-		quantity="`perl -e '$_ = shift @ARGV;
-			if(m/\((\d)\)/) { print $1 } else { print 1 }' -- "$quantity"`"
 
 		echo -n "{ \"object\": \"$object\", \"level\": ${level#L}, \"quantity\": $quantity }"
 	done
@@ -282,18 +297,18 @@ for offset in `seq 0 9`; do
 	#cat "$tempFile.txt"; eog "$tempFile"
 
 	if grep -qe "Items acquired" "$tempFile.txt"; then
-		log "detected 'items acquired' page at offset $offset"
+		debug "detected 'items acquired' page at offset $offset"
 		scrapeResults "friendly"
 	elif grep -qe "Hack successful" "$tempFile.txt"; then
-		log "detected 'hack successful' page at offset $offset"
+		debug "detected 'hack successful' page at offset $offset"
 		scrapeResults "enemy"
 	elif grep -qe "Hack acqu" "$tempFile.txt"; then		# only short phrase, since red -x% likely at the right hand side
-		log "hack failed"
+		debug "hack failed"
 		echo -n "{ \"type\": \"enemy\", \"items\": [] }"
 		rm -f "$tempFile" "$tempFile.txt"
 		exit 0
 	elif grep -qe "Portal running hot" "$tempFile.txt"; then
-		log "Portal running hot"
+		debug "Portal running hot"
 		rm -f "$tempFile" "$tempFile.txt"
 		exit 0
 	fi
