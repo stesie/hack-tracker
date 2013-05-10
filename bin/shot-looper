@@ -3,6 +3,7 @@ hacker_name=$1; shift;
 hacker_level=$1; shift;
 reso_state=""
 first=1
+multihack_stamp=0
 
 while filename="$1"; shift; do
 	scraped=$("${0%/*}/shot-scraper" "$filename") || scraped=""
@@ -14,13 +15,6 @@ while filename="$1"; shift; do
 
 	if echo "$scraped" | grep -qe "items"; then
 		if [ "$reso_state" = "" ]; then continue; fi
-
-		if [ "$first" -eq 1 ]; then
-			echo "{ \"docs\": ["
-			first=0
-		else
-			echo ","
-		fi
 
 		datetime="`perl -e '$_ = shift @ARGV;
 		if(m/Screenshot_(201\d-\d\d-\d\d)-(\d\d)-(\d\d)-(\d\d)\.png/) {
@@ -35,9 +29,30 @@ while filename="$1"; shift; do
 		fi
 
 		stamp="`date +%s -d \"$datetime\"`"
-		echo -n "{ \"_id\": \"$hacker_name-$stamp\", \"resos\": $reso_state, \"hacker\": { \"name\": \"$hacker_name\", \"level\": $hacker_level }, \"hack\": $scraped, \"timestamp\": $stamp, \"source\": \"${filename##*/}\" }"
+
+		if [ "$first" -eq 1 ]; then
+			echo "{ \"docs\": ["
+			first=0
+		else
+			echo ","
+		fi
+
+		if [ $multihack_stamp -gt 0 ]; then
+			if [ $[$stamp - $multihack_stamp] -lt 10 ]; then
+				multihack=$[$multihack + 1]
+			else
+				multihack=0
+			fi
+		else
+			multihack=0
+		fi
+
+		multihack_stamp=$stamp
+
+		echo -n "{ \"_id\": \"$hacker_name-$stamp\", \"resos\": $reso_state, \"hacker\": { \"name\": \"$hacker_name\", \"level\": $hacker_level }, \"hack\": $scraped, \"timestamp\": $stamp, \"derived-info\": { \"multihack\": $multihack }, \"source\": \"${filename##*/}\" }"
 	else
 		reso_state="$scraped"
+		multihack_stamp=0
 	fi
 done
 
