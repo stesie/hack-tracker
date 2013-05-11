@@ -214,12 +214,16 @@ if grep -qe "Energy" "$tempFile.txt"; then
 		expectPortalLevel=$[$resoTotal / 8]
 	fi
 
+	if [ $expectPortalLevel -lt 1 ]; then
+		expectPortalLevel=1
+	fi
+
 	#echo $resoTotal
 	#echo $expectPortalLevel
 	#echo $level
 
 	if [ $level -ne $expectPortalLevel ]; then
-		error "calculated portal level mismatches actual portal level"
+		error "calculated portal level mismatches actual portal level: $resoList | $expectPortalLevel"
 	fi
 
 	set -- $resoList
