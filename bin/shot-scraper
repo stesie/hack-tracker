@@ -175,7 +175,7 @@ getReso() {
 	fi
 
 	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $convertOpts "$tempFile"
-	tesseract "$tempFile" "$tempFile" -psm 7 ingress > /dev/null || return 0
+	tesseract "$tempFile" "$tempFile" -l res -psm 7 ingress > /dev/null || return 0
 	#cat "$tempFile.txt"; eog "$tempFile"
 
 	level=`perl -ne 'if(m/^L([1-8])/) { print $1 }' < "$tempFile.txt"`
@@ -262,7 +262,7 @@ scrapeResults() {
 		resultsListHeight=$[$resultsListBottom - $resultsListTop]
 
 		convert "$filename" $convertOpts -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop "$tempFile"
-		tesseract "$tempFile" "$tempFile" ingress-items > /dev/null
+		tesseract "$tempFile" "$tempFile" -l res ingress-items > /dev/null
 		sed -i -e 's/°\/0/%/'  -e 's/°\/c/%/'  -e 's/-[0-9]%//' "$tempFile.txt"
 		read a b c d < "$tempFile.txt"
 		#cat "$tempFile.txt"; eog "$tempFile"
@@ -340,7 +340,7 @@ scrapeResults() {
 for offset in `seq 0 9`; do
 	resultsListTop=$[$resultsHeadTop - $resultsHeadTopOffset * $offset / 2]
 	convert "$filename" $convertOpts -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop "$tempFile"
-	tesseract "$tempFile" "$tempFile" > /dev/null
+	tesseract "$tempFile" "$tempFile" -l res > /dev/null
 	#cat "$tempFile.txt"; eog "$tempFile"
 
 	if grep -qe "Items acquired" "$tempFile.txt"; then
