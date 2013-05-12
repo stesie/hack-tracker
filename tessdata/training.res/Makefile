@@ -17,6 +17,9 @@ unicharset: *.box
 font_properties:
 	echo ingress 0 0 0 0 0 > $@
 
+%.box: %.png
+	tesseract $< $(patsubst %.png, %, $<) batch.nochop makebox
+
 %.tr: %.png
 	tesseract $< $(patsubst %.png, %, $<) nobatch box.train
 
