@@ -257,7 +257,7 @@ scrapeResults() {
 	first=1
 	echo -n "{ \"type\": \"$1\", \"items\": ["
 
-	while [ $[$resultsListTop + $resultsHeadHeight] -lt $resultsListBottom ]; do
+	while [ $[$resultsListTop + $resultsHeadTopOffset + $resultsHeadHeight] -lt $resultsListBottom ]; do
 		resultsListTop=$[$resultsListTop + $resultsHeadTopOffset]
 		resultsListHeight=$[$resultsListBottom - $resultsListTop]
 
