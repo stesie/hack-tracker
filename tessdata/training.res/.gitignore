@@ -1,0 +1,12 @@
+*.tr
+*.txt
+*.bak
+res.inttemp
+res.normproto
+res.pffmtable
+res.shapetable
+res.traineddata
+res.unicharset
+unicharset
+res.freq-dawg
+font_properties
