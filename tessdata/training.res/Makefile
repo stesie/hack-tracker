@@ -18,7 +18,7 @@ font_properties:
 	echo ingress 0 0 0 0 0 > $@
 
 %.box: %.png
-	tesseract $< $(patsubst %.png, %, $<) batch.nochop makebox
+	tesseract $< $(patsubst %.png, %, $<) -l res batch.nochop makebox
 
 %.tr: %.png
 	tesseract $< $(patsubst %.png, %, $<) nobatch box.train
@@ -37,3 +37,5 @@ res.traineddata: train
 	mv pffmtable res.pffmtable
 	combine_tessdata res.
 
+install: res.traineddata
+	install -m644 $< /usr/share/tesseract-ocr/tessdata/
