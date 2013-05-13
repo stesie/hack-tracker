@@ -1,0 +1,20 @@
+{
+    "name": "hack-tracker",
+    "version": "0.0.1",
+    "description": "Ingress Hack Tracker",
+    "attachments": [
+	"index.html"
+    ],
+    "modules": [
+	"lib",
+	"views"
+    ],
+    "load": "lib/app",
+    "dependencies": {
+	"attachments": null,
+	"modules": null,
+	"properties": null,
+	"db": null,
+	"jquery": null
+    }
+}
