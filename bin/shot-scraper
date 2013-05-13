@@ -101,11 +101,42 @@ case "$imgWidth"x"$imgHeight" in
 		portalLevelHeight=40
 		;;
 
+	720x1280 )
+		resultsLeft=84
+		resultsWidth=546
+		resultsHeadTop=496
+		resultsHeadTopOffset=91
+		resultsHeadHeight=60
+
+		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
+		resultsListBottom=952
+
+		# energy string
+		energyWidth=128
+		energyHeight=42
+		energyLeft=418
+		energyTop=154
+
+		# reso list positions
+		resoListWidth=54
+		resoListHeight=42
+
+		resoListLeft=82
+		resoListOffset=63
+		resoListTop=650
+		resoListTop2=886
+
+		portalLevelLeft=628
+		portalLevelTop=68
+		portalLevelWidth=78
+		portalLevelHeight=54
+		;;
+
 	480x800 )
 		resultsLeft=64
 		resultsWidth=348
 		resultsHeadTop=318
-		resultsHeadTopOffset=75
+		resultsHeadTopOffset=72
 		resultsHeadHeight=60
 		resultsListBottom=633
 
