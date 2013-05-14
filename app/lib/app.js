@@ -79,7 +79,7 @@ function drawChart() {
 
     });
 
-    db.getView('hack-tracker', 'itemLevelsToHackLevels', { group: true }, function(err, data) {
+    db.getView('hack-tracker', 'itemLevelsToHackLevels', { group: true, group_level: 2 }, function(err, data) {
 	//var chartData = [ [ "Item type", "friendly", "enemy" ] ];
 	var hacks = { "friendly": {}, "enemy": {} };
 	//var totals = { "friendly": 0, "enemy": 0 };
@@ -109,13 +109,55 @@ function drawChart() {
 	}
     });
 
+    db.getView('hack-tracker', 'itemLevelsToHackLevels', { group: true }, function(err, data) {
+	var chartData = [ [ "Hack type & level", "-1", "0", "1", "2", "none" ] ];
+	var hackTypes = [ "friendly", "enemy" ];
+	var hacks = { };
+	var totals = { };
+
+	for(var i = 0; i < data.rows.length; i ++) {
+	    var hackType = data.rows[i].key[0] + " L" + data.rows[i].key[2];
+	    hacks[hackType] = hacks[hackType] || { };
+	    hacks[hackType][data.rows[i].key[1]] = data.rows[i].value;
+
+	    totals[hackType] = (totals[hackType] || 0) + data.rows[i].value;
+	}
+
+	console.log(hacks, totals);
+
+	for(var i = 0; i < hackTypes.length; i ++) {
+	    for(var level = 1; level <= 8; level ++) {
+		var hackType = hackTypes[i] + " L" + level;
+		var row = [ hackType ];
+
+		if(!hacks[hackType]) {
+		    continue;
+		}
+
+		for(var j = 1; j < chartData[0].length; j ++) {
+		    row.push((hacks[hackType][chartData[0][j]] || 0) / totals[hackType]);
+		}
+
+		chartData.push(row);
+	    }
+	}
+
+	var options = {
+	    isStacked: true
+	};
+
+	console.log(chartData);
+
+	var chart = new google.visualization.BarChart(document.getElementById('chart_itemLevelsDifferentHackLevels'));
+	chart.draw(google.visualization.arrayToDataTable(chartData), options);
+
+    });
+
+
     db.getView('hack-tracker', 'avgResultsOfHack', { group: true }, function(err, data) {
 	var chartData = [ [ "Item type", "friendly", "enemy" ] ];
 	var hacks = { "friendly": {}, "enemy": {} };
 	var itemTypes = [ "R", "X", "C" ];
-
-	console.log(data);
-
 
 	for(var i = 0; i < data.rows.length; i ++) {
 	    var key = data.rows[i].key[1] === '_hack' ? '_hack' :
@@ -125,8 +167,6 @@ function drawChart() {
 
 	    hacks[data.rows[i].key[0]][key] = data.rows[i].value;
 	}
-
-	console.log(hacks);
 
 	for(var i = 0; i < itemTypes.length; i ++) {
 	    for(var j = -1; j < 3; j ++) {
@@ -139,8 +179,6 @@ function drawChart() {
 		]);
 	    }
 	}
-
-	console.log(chartData);
 
 	var options = {
 	    colors: [ 'blue', 'green' ],
