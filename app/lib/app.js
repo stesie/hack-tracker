@@ -197,6 +197,13 @@ exports.init = function() {
 
     google.load("visualization", "1", {packages:["corechart"]});
     google.setOnLoadCallback(drawChart);
+
+    $('a + h3').each(function() {
+	var $el = $('<a>¶</a>')
+	    .attr('href', '#' + $(this).prev().attr("name"))
+	    .addClass("anchor");
+	$(this).append($el);
+    });
 }
 
 exports.views = require('./views');
