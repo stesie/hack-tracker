@@ -3,8 +3,14 @@
     "version": "0.0.1",
     "description": "Ingress Hack Tracker",
     "attachments": [
-	"index.html"
+	"index.html",
+	"static"
     ],
+    "less": {
+	"compress": true,
+	"compile": [ "static/css/hack-tracker.less" ],
+	"remove_from_attachments": true
+    },
     "modules": [
 	"lib",
 	"views"
@@ -12,6 +18,8 @@
     "load": "lib/app",
     "dependencies": {
 	"attachments": null,
+	"bootstrap": null,
+	"less-precompiler": null,
 	"modules": null,
 	"properties": null,
 	"db": null,

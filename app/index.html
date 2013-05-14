@@ -3,41 +3,78 @@
   <head>
     <meta charset="utf-8">
     <title>Ingress Hack Tracker</title>
+    <link rel="stylesheet" type="text/css" href="static/css/hack-tracker.css" />
   </head>
 
   <body>
-    <h1>Ingress Hack Tracker</h1>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+	<div class="container">
+	  <a class="brand" href="#">hack-tracker</a>
+	</div>
+      </div>
+    </div>
 
-    <a name="hacksByLevel"></a>
-    <h3>Number of hacks per level</h3>
-    <div id="chart_hacksByLevel" style="width: 900px; height: 500px;"></div>
+    <div>
+      <ul class="nav nav-tabs">
+	<li class="active"><a href="#hacksByLevel" data-toggle="tab">Hacks</a></li>
+	<li><a href="#itemsPerHack" data-toggle="tab">Average Items</a></li>
+	<li><a href="#itemcountPerHack" data-toggle="tab">Average Item Count</a></li>
+	<li class="dropdown">
+	  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+	    Item Levels
+	    <b class="caret"></b>
+	  </a>
 
-    <a name="itemsPerHack"></a>
-    <h3>Items per hack</h3>
-    <div id="chart_itemsPerHack" style="width: 900px; height: 500px;"></div>
+	  <ul class="dropdown-menu">
+	    <li><a href="#itemLevelsToHackLevels" data-toggle="tab">average per type</a></li>
+	    <li><a href="#itemLevelsDifferentHackLevels" data-toggle="tab">per hack level</a></li>
+	  </ul>
+	</li>
+	<li><a href="#avgResultsOfHack" data-toggle="tab">Average Results</a></li>
+      </ul>
 
-    <a name="itemcountPerHack"></a>
-    <h3>Itemcount per hack</h3>
-    <div id="chart_itemcountPerHack_friendly" style="width: 550px; height: 500px; float: left;"></div>
-    <div id="chart_itemcountPerHack_enemy" style="width: 550px; height: 500px; float: left;"></div>
+      <div class="tab-content">
+	<div class="tab-pane active" id="hacksByLevel">
+	  <h3>Number of hacks per level</h3>
+	  <div id="chart_hacksByLevel"></div>
+	</div>
 
-    <a name="itemLevelsToHackLevels"></a>
-    <h3 style="clear: both">Item levels relative to hack levels (on item base)</h3>
-    <div id="chart_itemLevelsToHackLevels_friendly" style="width: 550px; height: 500px; float: left;"></div>
-    <div id="chart_itemLevelsToHackLevels_enemy" style="width: 550px; height: 500px; float: left;"></div>
+	<div class="tab-pane" id="itemsPerHack">
+	  <h3>Items per hack</h3>
+	  <div id="chart_itemsPerHack"></div>
+	</div>
 
-    <a name="itemLevelsDifferentHackLevels"></a>
-    <h3 style="clear: both">Relative item levels for different hack levels (item base)</h3>
-    <div id="chart_itemLevelsDifferentHackLevels" style="width: 900px; height: 500px;"></div>
+	<div class="tab-pane" id="itemcountPerHack">
+	  <h3>Itemcount per hack</h3>
+	  <div id="chart_itemcountPerHack_friendly" style="float: left;"></div>
+	  <div id="chart_itemcountPerHack_enemy" style="float: left;"></div>
+	</div>
 
-    <a name="avgResultsOfHack"></a>
-    <h3 style="clear: both">Average results of one hack</h3>
-    <div id="chart_avgResultsOfHack" style="width: 900px; height: 500px;"></div>
+	<div class="tab-pane" id="itemLevelsToHackLevels">
+	  <h3 style="clear: both">Item levels relative to hack levels (on item base)</h3>
+	  <div id="chart_itemLevelsToHackLevels_friendly" style="float: left;"></div>
+	  <div id="chart_itemLevelsToHackLevels_enemy" style="float: left;"></div>
+	</div>
+
+	<div class="tab-pane" id="itemLevelsDifferentHackLevels">
+	  <h3 style="clear: both">Relative item levels for different hack levels (item base)</h3>
+	  <div id="chart_itemLevelsDifferentHackLevels"></div>
+	</div>
+
+	<div class="tab-pane" id="avgResultsOfHack">
+	  <h3 style="clear: both">Average results of one hack</h3>
+	  <div id="chart_avgResultsOfHack"></div>
+	</div>
+      </div>
+    </div>
 
     <script src="https://www.google.com/jsapi"></script>
     <script src="modules.js"></script>
     <script>
       require('lib/app').init();
     </script>
+    <script src="bootstrap/js/bootstrap-tab.js"></script>
+    <script src="bootstrap/js/bootstrap-dropdown.js"></script>
   </body>
 </html>

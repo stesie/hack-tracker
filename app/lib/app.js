@@ -15,6 +15,7 @@ function drawChart() {
 	}
 
 	var options = {
+	    width: 900, height: 500,
 	    colors: [ 'blue', 'green' ],
             //title: 'Number of hacks per level',
             vAxis: { title: 'Hack Level' }
@@ -47,6 +48,7 @@ function drawChart() {
 	}
 
 	var options = {
+	    width: 900, height: 500,
 	    colors: [ 'blue', 'green' ],
             vAxis: { title: 'Item type' }
 	};
@@ -70,6 +72,7 @@ function drawChart() {
 	    }
 
 	    var options = {
+		width: 550, height: 500,
 		title: hackType
 	    };
 
@@ -80,9 +83,7 @@ function drawChart() {
     });
 
     db.getView('hack-tracker', 'itemLevelsToHackLevels', { group: true, group_level: 2 }, function(err, data) {
-	//var chartData = [ [ "Item type", "friendly", "enemy" ] ];
 	var hacks = { "friendly": {}, "enemy": {} };
-	//var totals = { "friendly": 0, "enemy": 0 };
 	var levels = [ -1, 0, 1, 2, "none" ];
 
 	for(var i = 0; i < data.rows.length; i ++) {
@@ -101,6 +102,7 @@ function drawChart() {
 	    }
 
 	    var options = {
+		width: 550, height: 500,
 		title: 'Level difference (' + hackType + ' hacks)'
 	    };
 
@@ -123,8 +125,6 @@ function drawChart() {
 	    totals[hackType] = (totals[hackType] || 0) + data.rows[i].value;
 	}
 
-	console.log(hacks, totals);
-
 	for(var i = 0; i < hackTypes.length; i ++) {
 	    for(var level = 1; level <= 8; level ++) {
 		var hackType = hackTypes[i] + " L" + level;
@@ -143,10 +143,9 @@ function drawChart() {
 	}
 
 	var options = {
+	    width: 900, height: 500,
 	    isStacked: true
 	};
-
-	console.log(chartData);
 
 	var chart = new google.visualization.BarChart(document.getElementById('chart_itemLevelsDifferentHackLevels'));
 	chart.draw(google.visualization.arrayToDataTable(chartData), options);
@@ -181,6 +180,7 @@ function drawChart() {
 	}
 
 	var options = {
+	    width: 900, height: 500,
 	    colors: [ 'blue', 'green' ],
             vAxis: { title: 'Item type wrt. hack level' }
 	};
@@ -197,13 +197,6 @@ exports.init = function() {
 
     google.load("visualization", "1", {packages:["corechart"]});
     google.setOnLoadCallback(drawChart);
-
-    $('a + h3').each(function() {
-	var $el = $('<a>¶</a>')
-	    .attr('href', '#' + $(this).prev().attr("name"))
-	    .addClass("anchor");
-	$(this).append($el);
-    });
 }
 
 exports.views = require('./views');
