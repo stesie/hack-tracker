@@ -152,6 +152,63 @@ function drawChart() {
 
     });
 
+    db.getView('hack-tracker', 'itemLevelsToHackLevelFractions', { group: true }, function(err, data) {
+	var chartData = [ [ "Hack type & level fraction", "-1", "0", "1", "2", "none" ] ];
+	var tableData = new google.visualization.DataTable();
+	var hackTypes = [ "friendly", "enemy" ];
+	var hacks = { };
+	var totals = { };
+
+	tableData.addColumn("string", "Hack type");
+	for(var i = 0; i < 8; i ++) {
+	    tableData.addColumn("number", i + "/8");
+	}
+
+	tableData.addRows(2);
+	tableData.setCell(0, 0, "friendly");
+	tableData.setCell(1, 0, "enemy");
+
+	for(var i = 0; i < data.rows.length; i ++) {
+	    var hackType = data.rows[i].key[0] + " " + (data.rows[i].key[1] * 8) + "/8";
+	    hacks[hackType] = hacks[hackType] || { };
+	    hacks[hackType][data.rows[i].key[2]] = data.rows[i].value;
+
+	    totals[hackType] = (totals[hackType] || 0) + data.rows[i].value;
+	}
+
+	for(var i = 0; i < hackTypes.length; i ++) {
+	    for(var fraction = 0; fraction < 8; fraction ++) {
+		var hackType = hackTypes[i] + " " + fraction + "/8";
+		var row = [ hackType ];
+		var itemCount = 0;
+
+		if(!hacks[hackType]) {
+		    continue;
+		}
+
+		for(var j = 1; j < chartData[0].length; j ++) {
+		    var num = hacks[hackType][chartData[0][j]] || 0;
+		    itemCount += num;
+		    row.push(num / totals[hackType]);
+		}
+
+		chartData.push(row);
+		tableData.setCell(i, 1 + fraction, itemCount);
+	    }
+	}
+
+	var options = {
+	    width: 900, height: 500,
+	    isStacked: true
+	};
+
+	var chart = new google.visualization.BarChart(document.getElementById('chart_itemLevelsToLevelFractions'));
+	chart.draw(google.visualization.arrayToDataTable(chartData), options);
+
+	var table = new google.visualization.Table(document.getElementById('table_itemLevelsToLevelFractions'));
+        table.draw(tableData, { });
+    });
+
 
     db.getView('hack-tracker', 'avgResultsOfHack', { group: true }, function(err, data) {
 	var chartData = [ [ "Item type", "friendly", "enemy" ] ];
@@ -201,7 +258,7 @@ function drawChart() {
 exports.init = function() {
     window.$ = require('jquery');
 
-    google.load("visualization", "1", { packages: [ "corechart", "orgchart" ] });
+    google.load("visualization", "1", { packages: [ "corechart", "orgchart", "table" ] });
     google.setOnLoadCallback(drawChart);
 
     $("#pattern-choice").parent("form").on("submit", function(ev) {
@@ -218,8 +275,6 @@ exports.init = function() {
 	    endkey: pattern.concat(9, 9, 9, 9)
 	}, function(err, data) {
 	    var totals = { _all: 0 };
-	    console.log(data);
-
 	    $.each(data.rows, function(i, row) {
 		var pattern = row.key.slice(2);
 
@@ -231,7 +286,6 @@ exports.init = function() {
 		totals["_all"] += row.value;
 	    });
 
-	    console.log(totals);
 	    var chartData = new google.visualization.DataTable();
 	    chartData.addColumn("string", "Node");
 	    chartData.addColumn("string", "Manager");
@@ -243,9 +297,8 @@ exports.init = function() {
 	    $.each(totals, function(key, value) {
 		if(key === "_all") {
 		    return;
-
 		}
-		console.log(key, value);
+
 		var parent = key.split("-").slice(0, -1).join("-");
 
 		if(parent === "") {
@@ -267,8 +320,6 @@ exports.init = function() {
 		]);
 	    });
 
-	    console.log(chartData);
- 
 	    var chart = new google.visualization.OrgChart(document.getElementById('chart_hackPatterns'));
 	    chart.draw(chartData, { allowHtml: true, allowCollapse: true });
 	});

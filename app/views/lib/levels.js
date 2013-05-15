@@ -1,11 +1,16 @@
-exports.getPortalLevelFromDoc = function(doc) {
+exports.getPortalLevelFromDoc = function(doc, exact) {
     var resoSum = 0;
 
     for(var i = 0; i < 8; i ++) {
 	resoSum += doc.resos[i];
     }
 
-    return Math.floor(resoSum / 8);
+    if(exact) {
+	return resoSum / 8;
+    }
+    else {
+	return Math.floor(resoSum / 8);
+    }
 }
 
 exports.getHackLevelFromDoc = function(doc) {

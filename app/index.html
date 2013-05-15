@@ -29,6 +29,7 @@
 	  <ul class="dropdown-menu">
 	    <li><a href="#itemLevelsToHackLevels" data-toggle="tab">average per type</a></li>
 	    <li><a href="#itemLevelsDifferentHackLevels" data-toggle="tab">per hack level</a></li>
+	    <li><a href="#itemLevelsToLevelFractions" data-toggle="tab">per level fraction</a></li>
 	  </ul>
 	</li>
 	<li><a href="#avgResultsOfHack" data-toggle="tab">Average Results</a></li>
@@ -53,18 +54,26 @@
 	</div>
 
 	<div class="tab-pane" id="itemLevelsToHackLevels">
-	  <h3 style="clear: both">Item levels relative to hack levels (on item base)</h3>
+	  <h3>Item levels relative to hack levels (on item base)</h3>
 	  <div id="chart_itemLevelsToHackLevels_friendly" style="float: left;"></div>
 	  <div id="chart_itemLevelsToHackLevels_enemy" style="float: left;"></div>
 	</div>
 
 	<div class="tab-pane" id="itemLevelsDifferentHackLevels">
-	  <h3 style="clear: both">Relative item levels for different hack levels (item base)</h3>
+	  <h3>Relative item levels for different hack levels (item base)</h3>
 	  <div id="chart_itemLevelsDifferentHackLevels"></div>
 	</div>
 
+	<div class="tab-pane" id="itemLevelsToLevelFractions">
+	  <h3>Relative item levels for different hack levels fractions (item base)</h3>
+	  <div id="chart_itemLevelsToLevelFractions"></div>
+
+	  <h3>(absolute) number of hacked items by hack type &amp; level fraction</h3>
+	  <div id="table_itemLevelsToLevelFractions"></div>
+	</div>
+
 	<div class="tab-pane" id="avgResultsOfHack">
-	  <h3 style="clear: both">Average results of one hack</h3>
+	  <h3>Average results of one hack</h3>
 	  <div id="chart_avgResultsOfHack"></div>
 	</div>
 
