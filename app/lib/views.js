@@ -81,3 +81,44 @@ exports.avgResultsOfHack = {
     reduce: "_sum"
 };
 
+exports.hackPatterns = {
+    map: function(doc) {
+	var resoSum = 0, xmpSum = 0, shieldSum = 0, keySum = 0;
+
+	for(var a in doc.hack.items) {
+	    var item = doc.hack.items[a];
+	    if(item.object === "Resonator") {
+		resoSum += item.quantity;
+	    }
+	    else if(item.object === "Xmp") {
+		xmpSum += item.quantity;
+	    }
+	    else if(item.object === "Shield") {
+		shieldSum += item.quantity;
+	    }
+	    else if(item.object === "Key") {
+		keySum += item.quantity;
+	    }
+	}
+
+	require("views/lib/permute").permute([ doc.hack.type ], {
+	    "R": resoSum,
+	    "X": xmpSum,
+	});
+
+	require("views/lib/permute").permute([ doc.hack.type ], {
+	    "R": resoSum,
+	    "X": xmpSum,
+	    "SK": shieldSum + keySum
+	});
+
+	require("views/lib/permute").permute([ doc.hack.type ], {
+	    "R": resoSum,
+	    "X": xmpSum,
+	    "S": shieldSum,
+	    "K": keySum
+	});
+    },
+
+    reduce: "_count"
+}
