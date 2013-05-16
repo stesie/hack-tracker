@@ -17,9 +17,9 @@
 
     <div>
       <ul class="nav nav-tabs">
-	<li class="active"><a href="#hacksByLevel" data-toggle="tab">Hacks</a></li>
-	<li><a href="#itemsPerHack" data-toggle="tab">Average Items</a></li>
-	<li><a href="#itemcountPerHack" data-toggle="tab">Average Item Count</a></li>
+	<li class="active"><a href="#hacksByLevel">Hacks</a></li>
+	<li><a href="#itemsPerHack">Average Items</a></li>
+	<li><a href="#itemcountPerHack">Average Item Count</a></li>
 	<li class="dropdown">
 	  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
 	    Item Levels
@@ -27,13 +27,13 @@
 	  </a>
 
 	  <ul class="dropdown-menu">
-	    <li><a href="#itemLevelsToHackLevels" data-toggle="tab">average per type</a></li>
-	    <li><a href="#itemLevelsDifferentHackLevels" data-toggle="tab">per hack level</a></li>
-	    <li><a href="#itemLevelsToLevelFractions" data-toggle="tab">per level fraction</a></li>
+	    <li><a href="#itemLevelsToHackLevels">average per type</a></li>
+	    <li><a href="#itemLevelsDifferentHackLevels">per hack level</a></li>
+	    <li><a href="#itemLevelsToLevelFractions">per level fraction</a></li>
 	  </ul>
 	</li>
-	<li><a href="#avgResultsOfHack" data-toggle="tab">Average Results</a></li>
-	<li><a href="#hackPatterns" data-toggle="tab">Patterns</a></li>
+	<li><a href="#avgResultsOfHack">Average Results</a></li>
+	<li><a href="#hackPatterns">Patterns</a></li>
       </ul>
 
       <div class="tab-content">
@@ -94,5 +94,20 @@
     </script>
     <script src="bootstrap/js/bootstrap-tab.js"></script>
     <script src="bootstrap/js/bootstrap-dropdown.js"></script>
+    <script src="static/js/jquery.ba-hashchange.js"></script>
+    <script>
+      $(window).hashchange(function() {
+        var hash = location.hash;
+	var $tab = $(".nav-tabs li a[href=\"" + hash + "\"]");
+
+	if($tab.length === 0) {
+	    $tab = $(".nav-tabs li a:first");
+	}
+
+	$tab.tab("show")
+      });
+
+      $(window).hashchange();
+    </script>
   </body>
 </html>
