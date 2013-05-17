@@ -53,7 +53,7 @@ exports.itemLevelsToHackLevels = {
 	}
 
 	for(var a in items) {
-	    emit([ doc.hack.type, a, hackLevel ], items[a]);
+	    emit([ doc.hack.type, hackLevel, a ], items[a]);
 	}
     },
 

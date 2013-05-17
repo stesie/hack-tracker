@@ -82,13 +82,18 @@ function drawChart() {
 
     });
 
-    db.getView('hack-tracker', 'itemLevelsToHackLevels', { group: true, group_level: 2 }, function(err, data) {
+    db.getView('hack-tracker', 'itemLevelsToHackLevels', { group: true }, function(err, data) {
 	var hacks = { "friendly": {}, "enemy": {} };
 	var levels = [ -1, 0, 1, 2, "none" ];
 
 	for(var i = 0; i < data.rows.length; i ++) {
-	    hacks[data.rows[i].key[0]][data.rows[i].key[1]] = data.rows[i].value;
-	    //totals[data.rows[i].key[0]] += data.rows[i].value;
+	    if(data.rows[i].key[1] <= 1 || data.rows[i].key[1] >= 7) {
+		/* Ignore drops from L1, L7 & L8 portals, since these cannot drop
+		   L-1, L+1 or L+2 items (partly). */
+		continue;
+	    }
+
+	    hacks[data.rows[i].key[0]][data.rows[i].key[2]] = (hacks[data.rows[i].key[0]][data.rows[i].key[2]] || 0) + data.rows[i].value;
 	}
 
 	for(var hackType in hacks) {
@@ -118,9 +123,9 @@ function drawChart() {
 	var totals = { };
 
 	for(var i = 0; i < data.rows.length; i ++) {
-	    var hackType = data.rows[i].key[0] + " L" + data.rows[i].key[2];
+	    var hackType = data.rows[i].key[0] + " L" + data.rows[i].key[1];
 	    hacks[hackType] = hacks[hackType] || { };
-	    hacks[hackType][data.rows[i].key[1]] = data.rows[i].value;
+	    hacks[hackType][data.rows[i].key[2]] = data.rows[i].value;
 
 	    totals[hackType] = (totals[hackType] || 0) + data.rows[i].value;
 	}
