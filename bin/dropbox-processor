@@ -1,0 +1,30 @@
+#! /bin/bash
+rel="${0%/*}"
+. "$rel/dropbox-processor.cfg"
+
+if [ "$COUCH_URL" = "" ]; then
+	echo "COUCH_URL not defined."
+	exit 1
+fi
+
+agent="$1"; shift;
+level="$1"; shift;
+db_folder="$1"; shift;
+folder="$agent-`date +"%Y-%m-%d-%H-%M-%S"`"
+
+mkdir "$folder"
+cd "$folder"
+
+droptobox list "$db_folder" > listing.txt
+grep -e "^ \[F\]" listing.txt | cut -c6- > files.txt
+
+while read filename; do
+	droptobox download "$db_folder/$filename" "$filename" || exit 2
+	droptobox delete "$db_folder/$filename" || exit 2
+done < files.txt
+
+if test -s files.txt; then
+	"../$rel/shot-looper" "$agent" "$level" *.png > data.json || exit 1
+	curl -H 'Content-type: application/json' -X POST -vvvvv "$COUCH_URL/hack-tracker/_bulk_docs" -T data.json
+fi
+

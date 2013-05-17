@@ -1,0 +1,6 @@
+#! /bin/bash
+rel="${0%/*}"
+
+"$rel/dropbox-processor" Matschi 7 "/Ingress/Hack Tracker/Matschi_lvl7"
+"$rel/dropbox-processor" StilgarBF 8 "/Ingress/Hack Tracker/StilgarBF_L8"
+"$rel/dropbox-processor" Dilbertus 8 "/Ingress/Hack Tracker/Dilbertus_L8"
