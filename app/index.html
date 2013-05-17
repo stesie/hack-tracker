@@ -30,6 +30,7 @@
 	    <li><a href="#itemLevelsToHackLevels">average per type</a></li>
 	    <li><a href="#itemLevelsDifferentHackLevels">per hack level</a></li>
 	    <li><a href="#itemLevelsToLevelFractions">per level fraction</a></li>
+	    <li><a href="#itemLevelsEmptySlots">by number of empty slots</a></li>
 	  </ul>
 	</li>
 	<li><a href="#avgResultsOfHack">Average Results</a></li>
@@ -86,6 +87,21 @@
 
 	  <h3>(absolute) number of hacked items by hack type &amp; level fraction</h3>
 	  <div id="table_itemLevelsToLevelFractions"></div>
+	</div>
+
+	<div class="tab-pane" id="itemLevelsEmptySlots">
+	  <h3>Relative item levels by number of empty slots (item base)</h3>
+	  <div class="alert alert-info">
+	    <strong>
+	      Chart ignores items dropped out of L1, L7 and L8 portals.
+	    </strong>
+	    This is due to the fact, that these cannot drop some of either L-1, L+1 or L+2 items
+	    and hence would lead to biased results.
+	  </div>
+	  <div id="chart_itemLevelsEmptySlots"></div>
+
+	  <h3>(absolute) number of hacked items by hack type &amp; number of empty slots</h3>
+	  <div id="table_itemLevelsEmptySlots"></div>
 	</div>
 
 	<div class="tab-pane" id="avgResultsOfHack">

@@ -86,6 +86,34 @@ exports.itemLevelsToHackLevelFractions = {
     reduce: "_sum"
 };
 
+exports.itemLevelsToHackLevelEmptySlots = {
+    map: function(doc) {
+	var hackLevel = require('views/lib/levels').getHackLevelFromDoc(doc);
+	var emptySlotCount = 0;
+
+	for(var i = 0; i < 8; i ++) {
+	    if(doc.resos[i] === 0) {
+		emptySlotCount ++;
+	    }
+	}
+
+	var items = {};
+
+	for(var a in doc.hack.items) {
+	    var item = doc.hack.items[a];
+	    var levelDelta = item.level ? (item.level - hackLevel) : 'none';
+
+	    items[levelDelta] = (items[levelDelta] || 0) + item.quantity;
+	}
+
+	for(var a in items) {
+	    emit([ doc.hack.type, hackLevel, emptySlotCount, a ], items[a]);
+	}
+    },
+
+    reduce: "_sum"
+};
+
 exports.avgResultsOfHack = {
     map: function(doc) {
 	var hackLevel = require('views/lib/levels').getHackLevelFromDoc(doc);

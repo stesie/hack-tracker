@@ -215,6 +215,67 @@ function drawChart() {
     });
 
 
+    db.getView('hack-tracker', 'itemLevelsToHackLevelEmptySlots', { group: true }, function(err, data) {
+	var chartData = [ [ "Hack type & level fraction", "-1", "0", "1", "2", "none" ] ];
+	var tableData = new google.visualization.DataTable();
+	var hackTypes = [ "friendly", "enemy" ];
+	var hacks = { };
+	var totals = { };
+
+	tableData.addColumn("string", "Hack type");
+	for(var i = 0; i <= 8; i ++) {
+	    tableData.addColumn("number", "" + i);
+	}
+
+	tableData.addRows(2);
+	tableData.setCell(0, 0, "friendly");
+	tableData.setCell(1, 0, "enemy");
+
+	for(var i = 0; i < data.rows.length; i ++) {
+	    var hackType = data.rows[i].key[0] + " " + data.rows[i].key[2];
+
+	    if(data.rows[i].key[1] >= 2 && data.rows[i].key[1] < 7) {
+		hacks[hackType] = hacks[hackType] || { };
+		hacks[hackType][data.rows[i].key[3]] = (hacks[hackType][data.rows[i].key[3]] || 0) + data.rows[i].value;
+
+		totals[hackType] = (totals[hackType] || 0) + data.rows[i].value;
+	    }
+	}
+
+	for(var i = 0; i < hackTypes.length; i ++) {
+	    for(var emptySlots = 0; emptySlots <= 8; emptySlots ++) {
+		var hackType = hackTypes[i] + " " + emptySlots;
+		var row = [ hackType ];
+		var itemCount = 0;
+
+		if(!hacks[hackType]) {
+		    continue;
+		}
+
+		for(var j = 1; j < chartData[0].length; j ++) {
+		    var num = hacks[hackType][chartData[0][j]] || 0;
+		    itemCount += num;
+		    row.push(num / totals[hackType]);
+		}
+
+		chartData.push(row);
+		tableData.setCell(i, 1 + emptySlots, itemCount);
+	    }
+	}
+
+	var options = {
+	    width: 900, height: 500,
+	    isStacked: true
+	};
+
+	var chart = new google.visualization.BarChart(document.getElementById('chart_itemLevelsEmptySlots'));
+	chart.draw(google.visualization.arrayToDataTable(chartData), options);
+
+	var table = new google.visualization.Table(document.getElementById('table_itemLevelsEmptySlots'));
+        table.draw(tableData, { });
+    });
+
+
     db.getView('hack-tracker', 'avgResultsOfHack', { group: true }, function(err, data) {
 	var chartData = [ [ "Item type", "friendly", "enemy" ] ];
 	var hacks = { "friendly": {}, "enemy": {} };
