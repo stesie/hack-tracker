@@ -64,7 +64,7 @@ exports.itemLevelsToHackLevelFractions = {
     map: function(doc) {
 	var portalLevel = require('views/lib/levels').getPortalLevelFromDoc(doc, true);
 
-	if(doc.hacker.level < portalLevel) {
+	if(doc.hacker.level < portalLevel || portalLevel < 2 || portalLevel >= 7) {
 	    return;
 	}
 
