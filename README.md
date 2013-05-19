@@ -67,5 +67,7 @@ information to data.json file.
 In order to inject it to a couch database, use curl like this
 (assumes that you've already created a database named hack-tracker):
 
+<pre>
 curl -H 'Content-type: application/json' -X POST -v 'http://localhost:5984/hack-tracker/_bulk_docs' -T data.json
+</pre>
 
