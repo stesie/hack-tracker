@@ -195,7 +195,7 @@ convertOpts="-quality 100%"
 
 # Remove dark background stuff
 convertOpts="$convertOpts -contrast"
-convertOpts="$convertOpts -fill black -fuzz 45% -opaque black"
+convertOpts="$convertOpts -fill black -fuzz 30% -opaque black"
 
 # Remove turquois resonator lines
 convertOpts="$convertOpts -fill black -fuzz 10% -opaque rgb(25,121,181) -strip "
@@ -228,7 +228,7 @@ getReso() {
 	fi
 
 	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $convertOpts "$tempFile"
-	tesseract "$tempFile" "$tempFile" -l res -psm 7 ingress > /dev/null || return 0
+	tesseract "$tempFile" "$tempFile" -l res ingress > /dev/null || return 0
 	#cat "$tempFile.txt"; eog "$tempFile"
 
 	level=`perl -ne 'if(m/^L([1-8])/) { print $1 }' < "$tempFile.txt"`
