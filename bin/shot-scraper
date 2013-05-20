@@ -28,7 +28,9 @@ fi
 filename="$1"; shift;
 
 debug() {
-	true
+	return
+	message="$1"; shift;
+	echo "$filename: $message" 1>&2
 }
 
 log() {
@@ -124,7 +126,7 @@ case "$imgWidth"x"$imgHeight" in
 	720x1280 )
 		resultsLeft=84
 		resultsWidth=546
-		resultsHeadTop=496
+		resultsHeadTop=541
 		resultsHeadTopOffset=91
 		resultsHeadHeight=60
 
