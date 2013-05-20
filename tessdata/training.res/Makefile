@@ -29,6 +29,7 @@ train: font_properties unicharset
 	mftraining -F font_properties -U unicharset -O res.unicharset *.tr
 	cntraining -F font_properties -U unicharset *.tr
 	wordlist2dawg frequent_words_list res.freq-dawg res.unicharset 
+	wordlist2dawg words_list res.word-dawg res.unicharset 
 
 res.traineddata: train
 	mv shapetable res.shapetable
