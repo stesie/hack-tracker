@@ -54,141 +54,18 @@ imgWidth="$1"; shift;
 imgHeight="$1"; shift;
 debug "detected image size: $imgWidth x $imgHeight pixels"
 
-case "$imgWidth"x"$imgHeight" in
-	768x1280 )
-		# "Items acquired" string is positioned dynamically, if just one item
-		# is acquired, then it is roughly at 578x80+96+486.
-		# If three items are acquired, it's about 578x80+96+402
-		resultsLeft=$[$imgWidth * 12 / 100]
-		resultsWidth=$[$imgWidth * 75 / 100]
-		resultsHeadTop=530
-		resultsHeadTopOffset=89
-		resultsHeadHeight=$[$imgHeight * 6 / 100]
+if [ "$HTCONF_FILE" = "" ]; then
+	HTCONF_FILE=${0%/*}/../etc/"$imgWidth"x"$imgHeight".conf
+fi
 
-		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
-		resultsListBottom=$[$imgHeight * 75 / 100]
+if [ \! -e "$HTCONF_FILE" ]; then
+	error "no htconf file available"
+fi
 
-		# energy string
-		energyWidth=$[$imgWidth * 25 / 100]
-		energyHeight=$[$imgHeight * 4 / 100]
-		energyLeft=$[$imgWidth * 57 / 100]
-		energyTop=$[$imgHeight * 12 / 100]
+debug "using conf file $HTCONF_FILE"
+source "$HTCONF_FILE"
 
-		# reso list positions
-		resoListWidth=$[$imgWidth * 8 / 100]
-		resoListHeight=$[$imgHeight * 3 / 100]
-
-		resoListLeft=$[$imgWidth * 12 / 100]
-		resoListOffset=$[$imgWidth * 8 / 100]
-		resoListTop=$[$imgHeight * 51 / 100]
-		resoListTop2=$[$imgHeight * 69 / 100]
-
-		portalLevelLeft=684
-		portalLevelTop=64
-		portalLevelWidth=70
-		portalLevelHeight=58
-		;;
-
-	800x1280 )
-		# "Items acquired" string is positioned dynamically, if just one item
-		# is acquired, then it is roughly at 578x80+96+486.
-		# If three items are acquired, it's about 578x80+96+402
-		resultsLeft=94
-		resultsWidth=616
-		resultsHeadTop=511
-		resultsHeadTopOffset=73
-		resultsHeadHeight=62
-
-		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
-		resultsListBottom=972
-
-		# energy string
-		energyWidth=89
-		energyHeight=33
-		energyLeft=467
-		energyTop=115
-
-		# reso list positions
-		resoListWidth=35
-		resoListHeight=28
-
-		resoListLeft=148
-		resoListOffset=46
-		resoListTop=771
-		resoListTop2=949
-
-		portalLevelLeft=734
-		portalLevelTop=51
-		portalLevelWidth=58
-		portalLevelHeight=40
-		;;
-
-	720x1280 )
-		resultsLeft=84
-		resultsWidth=546
-		resultsHeadTop=541
-		resultsHeadTopOffset=91
-		resultsHeadHeight=60
-
-		# list of acquired items starts on line below resultsHeadTop, expanding down to 950
-		resultsListBottom=952
-
-		# energy string
-		energyWidth=128
-		energyHeight=42
-		energyLeft=418
-		energyTop=154
-
-		# reso list positions
-		resoListWidth=54
-		resoListHeight=42
-
-		resoListLeft=82
-		resoListOffset=63
-		resoListTop=650
-		resoListTop2=886
-
-		portalLevelLeft=628
-		portalLevelTop=68
-		portalLevelWidth=78
-		portalLevelHeight=54
-		;;
-
-	480x800 )
-		resultsLeft=64
-		resultsWidth=348
-		resultsHeadTop=318
-		resultsHeadTopOffset=72
-		resultsHeadHeight=60
-		resultsListBottom=633
-
-		# energy string
-		energyWidth=84
-		energyHeight=30
-		energyLeft=283
-		energyTop=119
-
-		# reso list positions
-		resoListWidth=43
-		resoListHeight=27
-
-		resoListLeft=51
-		resoListOffset=47
-		resoListTop=405
-		resoListTop2=582
-
-		portalLevelLeft=407
-		portalLevelTop=57
-		portalLevelWidth=52
-		portalLevelHeight=38
-		;;
-
-	*)
-		error "unsupported image resolution: $imgWidth x $imgHeight pixels"
-		break;;
-esac
-
-tempFile="`mktemp`.jpg"
+tempFile="`mktemp`.png"
 debug "using temporary file $tempFile"
 
 convertOpts="-quality 100%"
