@@ -69,7 +69,6 @@ tempFile="`mktemp`.png"
 debug "using temporary file $tempFile"
 
 convertOpts="-quality 100%"
-emptyOpts="-fuzz 3% -transparent rgb(16,31,34) -transparent rgb(8,20,16) -transparent rgb(25,105,156) -trim"
 
 
 #
@@ -85,22 +84,13 @@ getReso() {
 	offsetX=$1; shift;
 	offsetY=$1; shift;
 
-	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $emptyOpts "$tempFile" 2>/dev/null
-	set -- `identify -format "%w %h" "$tempFile"`
-
-	if [ "$1" -lt "5" -o "$2" -lt "5" ]; then
-		log "empty resonator slot found"
-		resoList="0 $resoList"
-		return
-	fi
-
 	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $convertOpts "$tempFile"
 
 	set -- `${0%/*}/reso-color-detect "$tempFile"`
 	level=$2
 	#cp "$tempFile" /home/stesie/Projekte/hack-tracker/tessdata/training.lvl/$tempFile-$counter-L$level; counter=$[$counter + 1]
 
-	[ "$level" -eq 0 ] && {
+	[ "$level" -lt 0 ] && {
 		#cp "$tempFile" /home/stesie/Projekte/hack-tracker/tessdata/training.lvl/$tempFile-$counter; counter=$[$counter + 1]
 		error "resonator level not readable"
 	}
@@ -124,11 +114,10 @@ if grep -qe "Energy" "$tempFile.txt"; then
 	set -- `${0%/*}/reso-color-detect "$tempFile"`
 	level=$2
 
-	[ "$level" -eq 0 ] && {
+	[ "$level" -lt 1 ] && {
 		#eog "$tempFile"
 		error "portal level not readable"
 	}
-
 
 	if [ $resoTotal -eq 0 ]; then
 		expectPortalLevel=1
@@ -206,6 +195,7 @@ scrapeResults() {
 
 			test "$b" = "Key" && a=Portal
 			test "$b" = "Shield" && a=Portal
+			test "$a" = "U" && a=L1
 
 			case $a in
 			L1 | L2 | L3 | L4 | L5 | L6 | L7 | L8)

@@ -65,7 +65,7 @@ function readPngToHueMap($file, &$hueMap) {
 			$rgb = imagecolorsforindex($img, imagecolorat($img, $x, $y));
 			$hsv = RGBtoHSV($rgb['red'], $rgb['green'], $rgb['blue']);
 
-			if($hsv['value'] < 25) {
+			if($hsv['value'] < 27) {
 				/* Ignore very dark pixels, probably background */
 				continue;
 			}
@@ -99,8 +99,15 @@ foreach($argv as $file) {
 asort($hueMap);
 #print_r($hueMap);
 
-if(array_sum($hueMap) < 100) {
+$mapSum = array_sum($hueMap);
+
+if($mapSum == 0) {
 	echo "0\t0\n";
+	exit();
+}
+
+if($mapSum < 100) {
+	echo "0\t-1\n";
 	exit();
 }
 
