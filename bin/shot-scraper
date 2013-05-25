@@ -179,7 +179,10 @@ scrapeResults() {
 
 		convert "$filename" $convertOpts -crop "$resultsWidth"x"$resultsHeadHeight"+$resultsLeft+$resultsListTop "$tempFile"
 		tesseract "$tempFile" "$tempFile" -l res ingress-items > /dev/null
-		sed -i -e 's/°\/0/%/'  -e 's/°\/c/%/'  -e 's/-[0-9]%//'  -e "s/\(L[1-8]\)\(Xmp\)/\1 \2/"  -e 's/Resonator(/Resonator (/' "$tempFile.txt"
+		sed -i -e 's/°\/0/%/'  -e 's/°\/c/%/'  -e 's/-[0-9]%//' \
+			-e "s/\(L[1-8]\)\(Xmp\)/\1 \2/" \
+			-e "s/R.*ator/Resonator/" -e "s/Res.*or/Resonator/" \
+			-e 's/Resonator(/Resonator (/' "$tempFile.txt"
 		read a b c d < "$tempFile.txt"
 		#cat "$tempFile.txt"; eog "$tempFile"
 
