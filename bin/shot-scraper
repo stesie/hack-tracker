@@ -164,6 +164,11 @@ convertOpts="$convertOpts -contrast"
 convertOpts="$convertOpts -fill black -fuzz 45% -opaque black"
 convertOpts="$convertOpts -contrast"
 
+convertOpts="$convertOpts -fill black -fuzz 5% -opaque rgb(0,239,255) "
+convertOpts="$convertOpts -fill black -fuzz 5% -opaque rgb(9,180,197) "
+convertOpts="$convertOpts -fill black -fuzz 5% -opaque rgb(9,218,231) "
+convertOpts="$convertOpts -fill black -fuzz 5% -opaque rgb(9,150,161) "
+
 scrapeResults() {
 	first=1
 	echo -n "{ \"type\": \"$1\", \"items\": ["
@@ -186,7 +191,7 @@ scrapeResults() {
 			a="L1"
 		fi
 
-		if grep -qe "OPEN" -e "Report" -- "$tempFile.txt"; then
+		if grep -qe "OPEN" -e "Comiccon" -e "Conspiracy" -e "Report" -- "$tempFile.txt"; then
 			object="Media"
 			level=0
 			quantity=1
