@@ -69,17 +69,6 @@ tempFile="`mktemp`.png"
 debug "using temporary file $tempFile"
 
 convertOpts="-quality 100%"
-
-# Remove dark background stuff
-convertOpts="$convertOpts -contrast"
-convertOpts="$convertOpts -fill black -fuzz 30% -opaque black"
-
-# Remove turquois resonator lines
-convertOpts="$convertOpts -fill black -fuzz 10% -opaque rgb(25,121,181) -strip "
-
-#convertOpts="$convertOpts -sharpen 0x1.0"
-convertOpts="$convertOpts -contrast"
-
 emptyOpts="-fuzz 3% -transparent rgb(16,31,34) -transparent rgb(8,20,16) -transparent rgb(25,105,156) -trim"
 
 
@@ -90,6 +79,7 @@ emptyOpts="-fuzz 3% -transparent rgb(16,31,34) -transparent rgb(8,20,16) -transp
 convert "$filename" -crop "$energyWidth"x"$energyHeight"+$energyLeft+$energyTop "$tempFile"
 #eog "$tempFile"
 tesseract "$tempFile" "$tempFile" -psm 7 > /dev/null
+counter=0
 
 getReso() {
 	offsetX=$1; shift;
@@ -105,12 +95,13 @@ getReso() {
 	fi
 
 	convert "$filename" -crop "$resoListWidth"x"$resoListHeight"+$offsetX+$offsetY $convertOpts "$tempFile"
-	tesseract "$tempFile" "$tempFile" -l res ingress > /dev/null || return 0
-	#cat "$tempFile.txt"; eog "$tempFile"
 
-	level=`perl -ne 'if(m/^L([1-8])/) { print $1 }' < "$tempFile.txt"`
-	[ "$level" = "" ] && {
-		#eog "$tempFile"
+	set -- `${0%/*}/reso-color-detect "$tempFile"`
+	level=$2
+	#cp "$tempFile" /home/stesie/Projekte/hack-tracker/tessdata/training.lvl/$tempFile-$counter-L$level; counter=$[$counter + 1]
+
+	[ "$level" -eq 0 ] && {
+		#cp "$tempFile" /home/stesie/Projekte/hack-tracker/tessdata/training.lvl/$tempFile-$counter; counter=$[$counter + 1]
 		error "resonator level not readable"
 	}
 
@@ -129,14 +120,15 @@ if grep -qe "Energy" "$tempFile.txt"; then
 	done
 
 	convert "$filename" -crop "$portalLevelWidth"x"$portalLevelHeight"+$portalLevelLeft+$portalLevelTop $convertOpts "$tempFile"
-	tesseract "$tempFile" "$tempFile" -psm 7 ingress > /dev/null || return 0
-	#cat "$tempFile.txt"; eog "$tempFile"
 
-	level=`perl -ne 'if(m/^L([1-8])/) { print $1 }' < "$tempFile.txt"`
-	[ "$level" = "" ] && {
+	set -- `${0%/*}/reso-color-detect "$tempFile"`
+	level=$2
+
+	[ "$level" -eq 0 ] && {
 		#eog "$tempFile"
 		error "portal level not readable"
 	}
+
 
 	if [ $resoTotal -eq 0 ]; then
 		expectPortalLevel=1
@@ -153,7 +145,7 @@ if grep -qe "Energy" "$tempFile.txt"; then
 	#echo $level
 
 	if [ $level -ne $expectPortalLevel ]; then
-		error "calculated portal level mismatches actual portal level: $resoList | $expectPortalLevel"
+		error "calculated portal level mismatches actual portal level: $resoList (read portal level: $level) | calculated: $expectPortalLevel"
 	fi
 
 	set -- $resoList
@@ -225,6 +217,7 @@ scrapeResults() {
 					quantity=$d
 					object="Cube"
 				else
+					#cp "$tempFile" /home/stesie/Projekte/hack-tracker/tessdata/training.lvl/$tempFile-$counter; counter=$[$counter + 1]
 					error "parse error, unknown b=$b"
 				fi
 
@@ -237,6 +230,7 @@ scrapeResults() {
 				;;
 
 			*)
+				#cp "$tempFile" /home/stesie/Projekte/hack-tracker/tessdata/training.lvl/$tempFile-$counter; counter=$[$counter + 1]
 				error "parse error, unknown a=$a b=$b"
 				;;
 			esac
