@@ -22,10 +22,10 @@ How to install?
 This is just a rough walk through installation on Debian based GNU/Linux systems:
 
 First of all you need to install the dependencies of hack-tracker shell scripts:
-tesseract, imagemagick, make, curl
+tesseract, imagemagick, make, curl, php5 (incl. gd module)
 
 <pre>
-apt-get install tesseract-ocr tesseract-ocr-eng imagemagick make curl
+apt-get install tesseract-ocr tesseract-ocr-eng imagemagick make curl php5-cli php5-gd
 </pre>
 
 Secondly you need to run tesseract training on provided hack result images:
