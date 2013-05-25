@@ -10,6 +10,7 @@ clean:
 	rm -f res.shapetable
 	rm -f res.traineddata
 	rm -f res.unicharset
+	rm -f res.word-dawg
 
 unicharset: *.box
 	unicharset_extractor $^
