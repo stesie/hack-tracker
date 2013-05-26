@@ -2,21 +2,25 @@
 exports.hacksByLevel = function() {
     var db = require('db').current();
     db.getView('hack-tracker', 'hacksByLevel', { group: true }, function(err, data) {
-	var chartData = [ [ "Level", "friendly", "enemy" ] ];
-	var hacks = { "friendly": {}, "enemy": {} };
+	var chartData = [ [ "Level", "friendly", "enemy", "neutral" ] ];
+	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 
 	for(var i = 0; i < data.rows.length; i ++) {
 	    hacks[data.rows[i].key[0]][data.rows[i].key[1]] = data.rows[i].value;
 	}
 
 	for(var i = 1; i <= 8; i ++) {
-	    chartData.push([ "L" + i, hacks["friendly"][i] || 0, hacks["enemy"][i] || 0 ]);
+	    chartData.push([
+		"L" + i,
+		hacks["friendly"][i] || 0,
+		hacks["enemy"][i] || 0,
+		hacks["neutral"][i] || 0
+	    ]);
 	}
 
 	var options = {
 	    width: 900, height: 500,
-	    colors: [ 'blue', 'green' ],
-            //title: 'Number of hacks per level',
+	    colors: [ 'blue', 'green', 'grey' ],
             vAxis: { title: 'Hack Level' }
 	};
 
@@ -28,8 +32,8 @@ exports.hacksByLevel = function() {
 exports.itemsPerHack = function() {
     var db = require('db').current();
     db.getView('hack-tracker', 'itemsPerHack', { group: true }, function(err, data) {
-	var chartData = [ [ "Item type", "friendly", "enemy" ] ];
-	var hacks = { "friendly": {}, "enemy": {} };
+	var chartData = [ [ "Item type", "friendly", "enemy", "neutral" ] ];
+	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 	var itemTypes = {};
 
 	for(var i = 0; i < data.rows.length; i ++) {
@@ -45,13 +49,14 @@ exports.itemsPerHack = function() {
 	    chartData.push([
 		itemType,
 		(hacks["friendly"][itemType] || 0) / hacks["friendly"]["_hack"],
-		(hacks["enemy"][itemType] || 0) / hacks["enemy"]["_hack"]
+		(hacks["enemy"][itemType] || 0) / hacks["enemy"]["_hack"],
+		(hacks["neutral"][itemType] || 0) / hacks["neutral"]["_hack"]
 	    ]);
 	}
 
 	var options = {
 	    width: 900, height: 500,
-	    colors: [ 'blue', 'green' ],
+	    colors: [ 'blue', 'green', 'grey' ],
             vAxis: { title: 'Item type' }
 	};
 
@@ -63,7 +68,7 @@ exports.itemsPerHack = function() {
 exports.itemcountPerHack = function() {
     var db = require('db').current();
     db.getView('hack-tracker', 'itemcountPerHack', { group: true }, function(err, data) {
-	var hacks = { "friendly": {}, "enemy": {} };
+	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 
 	for(var i = 0; i < data.rows.length; i ++) {
 	    hacks[data.rows[i].key[0]][data.rows[i].key[1]] = data.rows[i].value;
@@ -295,8 +300,8 @@ exports.itemLevelsEmptySlots = function() {
 exports.avgResultsOfHack = function() {
     var db = require('db').current();
     db.getView('hack-tracker', 'avgResultsOfHack', { group: true }, function(err, data) {
-	var chartData = [ [ "Item type", "friendly", "enemy" ] ];
-	var hacks = { "friendly": {}, "enemy": {} };
+	var chartData = [ [ "Item type", "friendly", "enemy", "neutral" ] ];
+	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 	var itemTypes = [ "R", "X", "C" ];
 
 	for(var i = 0; i < data.rows.length; i ++) {
@@ -315,14 +320,15 @@ exports.avgResultsOfHack = function() {
 		chartData.push([
 		    key,
 		    (hacks["friendly"][key] || 0) / hacks["friendly"]["_hack"],
-		    (hacks["enemy"][key] || 0) / hacks["enemy"]["_hack"]
+		    (hacks["enemy"][key] || 0) / hacks["enemy"]["_hack"],
+		    (hacks["neutral"][key] || 0) / hacks["neutral"]["_hack"]
 		]);
 	    }
 	}
 
 	var options = {
 	    width: 900, height: 500,
-	    colors: [ 'blue', 'green' ],
+	    colors: [ 'blue', 'green', 'grey' ],
             vAxis: { title: 'Item type wrt. hack level' }
 	};
 
