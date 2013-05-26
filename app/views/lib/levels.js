@@ -9,7 +9,7 @@ exports.getPortalLevelFromDoc = function(doc, exact) {
 	return resoSum / 8;
     }
     else {
-	return Math.floor(resoSum / 8);
+	return Math.max(1, Math.floor(resoSum / 8));
     }
 }
 
