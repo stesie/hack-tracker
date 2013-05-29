@@ -23,5 +23,15 @@ rel="${0%/*}"
 
 "$rel/dropbox-processor" Matschi 7 "/Ingress/Hack Tracker/Matschi_lvl7"
 "$rel/dropbox-processor" StilgarBF 8 "/Ingress/Hack Tracker/StilgarBF_L8"
-"$rel/dropbox-processor" Dilbertus 8 "/Ingress/Hack Tracker/Dilbertus_L8"
 "$rel/dropbox-processor" B4sti4n 8 "/Ingress/Hack Tracker/B4sti4n L8"
+"$rel/dropbox-processor" stesie 8 "/Ingress/Hack Tracker/stesie_L8"
+
+"$rel/dropbox-processor" Dilbertus 8 "/Ingress/Hack Tracker/Dilbertus_L8"
+"$rel/dropbox-processor" Blaustern 8 "/Ingress/Hack Tracker/Blaustern L8"
+
+"$rel/dropbox-processor" Subject13 1 "/Ingress/Hack Tracker/aleccale_lvl1"
+
+export HTCONF_FILE=$HOME/Projekte/hack-tracker/etc/720x1280-woozar.conf
+"$rel/dropbox-processor" Woozar 8 "/Ingress/Hack Tracker/Woozar_L8"
+"$rel/dropbox-processor" Saphina 1 "/Ingress/Hack Tracker/Saphina_L1"
+
