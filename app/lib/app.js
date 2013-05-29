@@ -8,6 +8,16 @@ function prepareTab($tab) {
     }
 }
 
+function makePassword() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for(var i = 0; i < 8; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
+    return text;
+}
 
 exports.init = function() {
     window.$ = require('jquery');
@@ -16,6 +26,29 @@ exports.init = function() {
         prepareTab($(ev.target));
     });
 
+    $("#create-user-dialog").on("shown", function(ev) {
+	$("#create-user-name").val("");
+	$("#create-user-password").val(makePassword());
+    });
+
+    $("#create-user-btn").on("click", function(ev) {
+	var doc = {
+	    "_id": "org.couchdb.user:" + $("#create-user-name").val(),
+	    "name": $("#create-user-name").val(),
+	    "type": "user",
+	    "roles": [ "hack-tracker" ],
+	    "password": $("#create-user-password").val()
+	}
+
+	var url = require("db").current().url;
+	var i = url.lastIndexOf("/");
+
+	url = url.slice(0, i) + "/_users";
+	var db = require('db').use(url);
+	db.saveDoc(doc, function(err, data) {
+	    $("#create-user-dialog").modal("hide");
+	});
+    });
 
     google.load("visualization", "1", { packages: [ "corechart", "orgchart", "table" ] });
     google.setOnLoadCallback(function() {
