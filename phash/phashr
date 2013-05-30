@@ -1,0 +1,20 @@
+#! /usr/bin/php5
+<?php
+
+require_once __DIR__.'/inc/ScreenConfiguration/Nexus4.php';
+require_once __DIR__.'/inc/PortalImage.php';
+require_once __DIR__.'/inc/PortalScreenshot.php';
+require_once __DIR__.'/inc/PortalDetector.php';
+
+$screen = new ScreenConfiguration_Nexus4();
+$pd = new PortalDetector($screen);
+
+$pd->train(new DirectoryIterator('portals/'));
+
+array_shift($argv);
+foreach($argv as $file) {
+	$ps = new PortalScreenshot($screen, $file);
+	$portalId = $pd->findPortalId($ps);
+
+	printf("%s: %s\n", $file, $portalId);
+}
