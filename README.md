@@ -24,18 +24,18 @@ This is just a rough walk through installation on Debian based GNU/Linux systems
 First of all you need to install the dependencies of hack-tracker shell scripts:
 tesseract, imagemagick, make, curl, php5 (incl. gd module)
 
-<pre>
+```
 apt-get install tesseract-ocr tesseract-ocr-eng imagemagick make curl php5-cli php5-gd
-</pre>
+```
 
 Secondly you need to run tesseract training on provided hack result images:
 (`make install` installs the files to `/usr/share/tesseract-ocr/tessdata/`)
 
-<pre>
+```
 cd tessdata/training.res
 make res.traineddata
 sudo make install
-</pre>
+```
 
 Thirdly copy extra tesseract configs from `tessdata/configs` to
 `/usr/share/tesseract-ocr/tessdata/configs/` directory.
@@ -44,10 +44,10 @@ hack-tracker scripts should now be ready to use.
 
 Just run some tests to make sure:
 
-<pre>
+```
 cd test/acquired-items
 make test
-</pre>
+```
 
 
 How to use?
@@ -55,9 +55,9 @@ How to use?
 
 Go to the directory where you've copied the screenshots to, then:
 
-<pre>
+```
 /path/to/hack-tracker/bin/shot-looper stesie 8 *.png > data.json
-</pre>
+```
 
 ... and of course replace the nickname and level specification.
 
@@ -67,7 +67,29 @@ information to data.json file.
 In order to inject it to a couch database, use curl like this
 (assumes that you've already created a database named hack-tracker):
 
-<pre>
+```
 curl -H 'Content-type: application/json' -X POST -v 'http://localhost:5984/hack-tracker/_bulk_docs' -T data.json
-</pre>
+```
+
+
+How to use pHash support (experimental)
+-----------------------------
+
+First you need to install pHash and its PHP module
+
+```
+sudo apt-get install cimg-dev libsndfile1-dev libsamplerate0-dev libmpg123-dev php5-dev
+wget http://phash.org/releases/pHash-0.9.6.tar.gz
+tar xvzf pHash-0.9.6.tar.gz
+cd pHash-0.9.6/
+./configure --enable-video-hash=no LIBS="-lpthread"
+make
+sudo make install
+cd bindings/php
+./configure LIBS="-lpthread"
+make clean
+make
+sudo make install
+echo extension="pHash.so" | sudo tee /etc/php5/conf.d/20-phash.ini
+```
 
