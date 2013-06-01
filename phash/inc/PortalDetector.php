@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/ScreenConfiguration/Interface.php';
+require_once __DIR__.'/PortalImage.php';
 
 class PortalDetector {
 	protected $_screenConfig;
