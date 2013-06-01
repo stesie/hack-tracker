@@ -1,0 +1,107 @@
+#! /usr/bin/php5
+<?php
+
+require_once __DIR__.'/inc/ScreenConfiguration/Nexus4.php';
+require_once __DIR__.'/inc/PortalScreenshot.php';
+require_once __DIR__.'/inc/PortalDetector.php';
+
+$screen = new ScreenConfiguration_Nexus4();
+$pd = new PortalDetector($screen);
+
+$options = 't:c:d:n:';
+$opts = getopt($options);
+
+foreach($opts as $key => $value) {
+	switch($key) {
+		case 't':
+			foreach(is_array($value) ? $value : array($value) as $dirSpec) {
+				$pd->train(new DirectoryIterator($dirSpec));
+			}
+			break;
+
+		case 'c':
+			$couchUrl = $value;
+			break;
+
+		case 'd':
+			$couchDbName = $value;
+			break;
+
+		case 'n':
+			$nickName = $value;
+			break;
+	}
+
+	while($k = array_search('-'.$key, $argv)) {
+		if($k) {
+			unset($argv[$k]);
+		}
+
+		if(preg_match('/^.*'.$key.":.*$/i", $options)) {
+			unset( $argv[$k+1] );
+		}
+	}
+}
+
+if(empty($couchUrl)) {
+	echo 'CouchDB-URL (-c) not provided.';
+	exit(2);
+}
+
+if(empty($couchDbName)) {
+	echo 'CouchDB-Name (-d) not provided.';
+	exit(2);
+}
+
+if(empty($nickName)) {
+	echo 'nickname (-n) not provided.';
+	exit(2);
+}
+
+$conn = new CouchdbClient($couchUrl);
+$conn->selectDB($couchDbName);
+
+$docs = $conn->getTempView(json_encode(array(
+            "map" => 'function(doc) {
+                        if(doc.hacker.name !== "'.$nickName.'") {
+                          return;
+                        }
+
+                        if(typeof doc.hack.portal === "object") {
+                          /* portal already assigned, nothing to do. */
+                          return;
+                        }
+
+                        if(typeof doc.source !== "object") {
+                          /* old source type, i.e. only filename of hack results present, ignore. */
+                          return;
+                        }
+
+                        emit(doc._id, doc.source.portal);
+                      }',
+                )));
+
+foreach($docs->rows as $data) {
+	$hackFile = $data->value;
+	$changed = false;
+
+	if(!file_exists($hackFile)) {
+        continue;
+	}
+
+	printf("%s (file %s) ...\n", $data->id, $hackFile);
+	$doc = $conn->getDoc($data->id);
+
+	$ps = new PortalScreenshot($screen, $hackFile);
+	$portalId = $pd->findPortalId($ps);
+
+	if($portalId !== null) {
+		$doc->hack->portal = (object) array('id' => $portalId);
+		$changed = true;
+	}
+
+	if($changed) {
+		$res = $conn->storeDoc($doc);
+		print_r($res);
+	}
+}
