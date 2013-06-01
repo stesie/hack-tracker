@@ -9,7 +9,28 @@ require_once __DIR__.'/inc/PortalDetector.php';
 $screen = new ScreenConfiguration_Nexus4();
 $pd = new PortalDetector($screen);
 
-$pd->train(new DirectoryIterator('portals/'));
+$options = 't:';
+$opts = getopt('t:');
+
+foreach($opts as $key => $value) {
+	switch($key) {
+		case 't':
+			foreach(is_array($value) ? $value : array($value) as $dirSpec) {
+				$pd->train(new DirectoryIterator($dirSpec));
+			}
+			break;
+	}
+
+	while($k = array_search('-'.$key, $argv)) {
+		if($k) {
+			unset($argv[$k]);
+		}
+
+		if(preg_match('/^.*'.$key.":.*$/i", $options)) {
+			unset( $argv[$k+1] );
+		}
+	}
+}
 
 array_shift($argv);
 foreach($argv as $file) {
