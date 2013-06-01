@@ -23,7 +23,7 @@ class ScreenConfiguration_Nexus4 implements ScreenConfiguration_Interface {
 	}
 
 	function getCutoutArea() {
-		return new Rectangle(190, 146, 90, 374);
+		return new Rectangle(212, 98, 68, 374);
 	}
 }
 
