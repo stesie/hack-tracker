@@ -31,6 +31,8 @@ rel="${0%/*}"
 
 "$rel/dropbox-processor" Subject13 1 "/Ingress/Hack Tracker/aleccale_lvl1"
 
+"$rel/dropbox-processor" spatzunder 2 '/Ingress/Hack Tracker/spatzunder L2' 
+
 export HTCONF_FILE=$HOME/Projekte/hack-tracker/etc/720x1280-woozar.conf
 "$rel/dropbox-processor" Woozar 8 "/Ingress/Hack Tracker/Woozar_L8"
 "$rel/dropbox-processor" Saphina 1 "/Ingress/Hack Tracker/Saphina_L1"
