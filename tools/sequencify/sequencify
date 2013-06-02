@@ -1,0 +1,59 @@
+#! /usr/bin/php5
+<?php
+
+require __DIR__.'/inc/Sequencifier.php';
+
+$options = 'c:d:n:';
+$opts = getopt($options);
+
+foreach($opts as $key => $value) {
+	switch($key) {
+		case 'c':
+			$couchUrl = $value;
+			break;
+
+		case 'd':
+			$couchDbName = $value;
+			break;
+
+		case 'n':
+			$nickName = $value;
+			break;
+	}
+
+	while($k = array_search('-'.$key, $argv)) {
+		if($k) {
+			unset($argv[$k]);
+		}
+
+		if(preg_match('/^.*'.$key.":.*$/i", $options)) {
+			unset( $argv[$k+1] );
+		}
+	}
+}
+
+if(empty($couchUrl)) {
+	echo 'CouchDB-URL (-c) not provided.';
+	exit(2);
+}
+
+if(empty($couchDbName)) {
+	echo 'CouchDB-Name (-d) not provided.';
+	exit(2);
+}
+
+if(empty($nickName)) {
+	echo 'nickname (-n) not provided.';
+	exit(2);
+}
+
+$conn = new CouchdbClient($couchUrl);
+$conn->selectDB($couchDbName);
+
+$seq = new Sequencifier($conn);
+$seq->load($nickName);
+$seq->moveMultihacks();
+$seq->flagHackSequence();
+$seq->store();
+
+print_r($seq);
