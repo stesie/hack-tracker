@@ -1,12 +1,21 @@
 
 exports.hacksByLevel = function() {
     var db = require('db').current();
-    db.getView('hack-tracker', 'hacksByLevel', { group: true }, function(err, data) {
+    var options = { group: true };
+    var epoch = $("#epoch-choice :selected").val();
+
+    if(epoch !== "_all") {
+	options.startkey = [ parseInt(epoch) ];
+	options.endkey = [ parseInt(epoch), "z" ];
+    }
+
+    db.getView('hack-tracker', 'hacksByLevel', options, function(err, data) {
 	var chartData = [ [ "Level", "friendly", "enemy", "neutral" ] ];
 	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 
 	for(var i = 0; i < data.rows.length; i ++) {
-	    hacks[data.rows[i].key[0]][data.rows[i].key[1]] = data.rows[i].value;
+	    hacks[data.rows[i].key[1]][data.rows[i].key[2]] =
+		(hacks[data.rows[i].key[1]][data.rows[i].key[2]] || 0) + data.rows[i].value;
 	}
 
 	for(var i = 1; i <= 8; i ++) {
@@ -31,14 +40,23 @@ exports.hacksByLevel = function() {
 
 exports.itemsPerHack = function() {
     var db = require('db').current();
-    db.getView('hack-tracker', 'itemsPerHack', { group: true }, function(err, data) {
+    var options = { group: true };
+    var epoch = $("#epoch-choice :selected").val();
+
+    if(epoch !== "_all") {
+	options.startkey = [ parseInt(epoch) ];
+	options.endkey = [ parseInt(epoch), "z" ];
+    }
+
+    db.getView('hack-tracker', 'itemsPerHack', options, function(err, data) {
 	var chartData = [ [ "Item type", "friendly", "enemy", "neutral" ] ];
 	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 	var itemTypes = {};
 
 	for(var i = 0; i < data.rows.length; i ++) {
-	    hacks[data.rows[i].key[0]][data.rows[i].key[1]] = data.rows[i].value;
-	    itemTypes[data.rows[i].key[1]] = 1;
+	    hacks[data.rows[i].key[1]][data.rows[i].key[2]] =
+		(hacks[data.rows[i].key[1]][data.rows[i].key[2]] || 0) + data.rows[i].value;
+	    itemTypes[data.rows[i].key[2]] = 1;
 	}
 
 	for(var itemType in itemTypes) {

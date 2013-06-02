@@ -31,6 +31,11 @@ exports.init = function() {
 	$("#create-user-password").val(makePassword());
     });
 
+    $("#epoch-choice").on("click", function(ev) {
+	$(".nav-tabs li a").data("initialized", false);
+	prepareTab($(".nav-tabs .active a"));
+    });
+
     $("#create-user-btn").on("click", function(ev) {
 	var doc = {
 	    "_id": "org.couchdb.user:" + $("#create-user-name").val(),
