@@ -20,6 +20,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+if [ "$1" = "--ap-extract" ]; then
+	apExtract=1
+	shift
+fi
+
 if [ \! -e "$1" ]; then
 	echo "shot-scraper: File does not exist: $1" 1>&2
 	exit 2
@@ -294,6 +299,22 @@ for offset in `seq 0 9`; do
 		exit 0
 	fi
 done
+
+if [ "$apExtract" != "" ]; then
+	convertOpts=""
+	convertOpts="$convertOpts -fill black -fuzz 5% +opaque white "
+
+	convert "$filename" -crop "$apWidth"x"$apHeight"+$apLeft+$apTop "$tempFile"
+	tesseract "$tempFile" "$tempFile" -l res ingress-ap > /dev/null
+	set -- `cat $tempFile.txt`
+
+	if [ "$2" = "AP" ]; then
+		debug "AP page"
+		echo "\"ap\": { \"score\": $1, \"source\": \"$filename\" }"
+		rm -f "$tempFile" "$tempFile.txt"
+		exit 0
+	fi
+fi
 
 
 rm -f "$tempFile" "$tempFile.txt"
