@@ -31,7 +31,7 @@ exports.init = function() {
 	$("#create-user-password").val(makePassword());
     });
 
-    $("#epoch-choice").on("click", function(ev) {
+    $("#chart-config select").on("click", function(ev) {
 	$(".nav-tabs li a").data("initialized", false);
 	prepareTab($(".nav-tabs .active a"));
     });

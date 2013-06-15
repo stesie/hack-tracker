@@ -39,33 +39,34 @@ exports.hacksByLevel = function() {
 };
 
 
-function _itemsPerHackStat(hackData, itemType) {
-    if(typeof hackData[itemType] === "undefined") {
-	return [ 0, 0, 0 ];
-    }
-
-    var hackCount = hackData["_hack"]["count"]
-
-    var average = hackData[itemType]["sum"] / hackCount;
-    var stdDev = Math.sqrt((hackData[itemType]["sumsqr"]
-			    - Math.pow(hackData[itemType]["sum"], 2) / hackCount)
-			   / (hackCount - 1));
-
-    return [
-	average,
-	Math.max(0, average - 2 * stdDev),
-	average + 2 * stdDev,
-    ];
-}
-
 function _renderItemsPerHackChart(viewName, vAxisTitle, divId) {
     var db = require('db').current();
     var options = { group: true };
     var epoch = $("#epoch-choice :selected").val();
+    var sigmaMultiplier = $("#sigma-choice :selected").val();
 
     if(epoch !== "_all") {
 	options.startkey = [ parseInt(epoch) ];
 	options.endkey = [ parseInt(epoch), "z" ];
+    }
+
+    function _itemsPerHackStat(hackData, itemType) {
+	if(typeof hackData[itemType] === "undefined") {
+	    return [ 0, 0, 0 ];
+	}
+
+	var hackCount = hackData["_hack"]["count"]
+
+	var average = hackData[itemType]["sum"] / hackCount;
+	var stdDev = Math.sqrt((hackData[itemType]["sumsqr"]
+				- Math.pow(hackData[itemType]["sum"], 2) / hackCount)
+			       / (hackCount - 1));
+
+	return [
+	    average,
+	    Math.max(0, average - sigmaMultiplier * stdDev),
+	    average + sigmaMultiplier * stdDev,
+	];
     }
 
     db.getView('hack-tracker', viewName, options, function(err, data) {

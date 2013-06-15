@@ -24,12 +24,18 @@
 	    </li>
 	  </ul>
 
-	  <form class="navbar-form pull-right">
+	  <form id="chart-config" class="navbar-form pull-right">
 	    <select id="epoch-choice">
 	      <option value="_all">all epochs</option>
 	      <option value="0">before viruses (&lt; 2013-05-30 22:00)</option>
 	      <option value="1">after viruses (&lt; 2013-06-03 18:00)</option>
-		  <option value="2">better xmp droprate (&gt;= 2013-06-03 18:00)</option>
+	      <option value="2">better xmp droprate (&gt;= 2013-06-03 18:00)</option>
+	    </select>
+
+	    <select id="sigma-choice">
+	      <option value="1">±1σ (~68 %)</option>
+	      <option value="2" selected="selected">±2σ (~95 %)</option>
+	      <option value="3">±3σ (~99,7 %)</option>
 	    </select>
 	  </form>
 	</div>
