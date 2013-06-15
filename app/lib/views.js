@@ -35,7 +35,7 @@ exports.itemsPerHack = {
 	], 1);
     },
 
-    reduce: "_sum"
+    reduce: "_stats"
 };
 
 exports.itemcountPerHack = {

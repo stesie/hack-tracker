@@ -38,6 +38,27 @@ exports.hacksByLevel = function() {
     });
 };
 
+
+function _itemsPerHackStat(hackData, itemType) {
+    if(typeof hackData[itemType] === "undefined") {
+	return [ 0, 0, 0 ];
+    }
+
+    var hackCount = hackData["_hack"]["count"]
+
+    var average = hackData[itemType]["sum"] / hackCount;
+    var stdDev = Math.sqrt((hackData[itemType]["sumsqr"]
+			    - Math.pow(hackData[itemType]["sum"], 2) / hackCount)
+			   / (hackCount - 1));
+
+    return [
+	average,
+	Math.max(0, average - 2 * stdDev),
+	average + 2 * stdDev,
+    ];
+}
+
+
 exports.itemsPerHack = function() {
     var db = require('db').current();
     var options = { group: true };
@@ -49,27 +70,54 @@ exports.itemsPerHack = function() {
     }
 
     db.getView('hack-tracker', 'itemsPerHack', options, function(err, data) {
-	var chartData = [ [ "Item type", "friendly", "enemy", "neutral" ] ];
 	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 	var itemTypes = {};
 
+	/* The data array is structured as follows:
+
+	   key[0] = epoch index
+	   key[1] = hack type (enemy/frienly)
+	   key[2] = item type (reso/xmp/etc)
+
+	   value contains a _stats object with sum, count, sumsqr.
+
+	   There is the special pseudo item type "_hack", which provides us with the
+	   total number of hacks. */
+
 	for(var i = 0; i < data.rows.length; i ++) {
 	    hacks[data.rows[i].key[1]][data.rows[i].key[2]] =
-		(hacks[data.rows[i].key[1]][data.rows[i].key[2]] || 0) + data.rows[i].value;
+		hacks[data.rows[i].key[1]][data.rows[i].key[2]] || {};
+
+	    for(var el in data.rows[i].value) {
+		hacks[data.rows[i].key[1]][data.rows[i].key[2]][el] =
+		    (hacks[data.rows[i].key[1]][data.rows[i].key[2]][el] || 0) + data.rows[i].value[el];
+	    }
+
 	    itemTypes[data.rows[i].key[2]] = 1;
 	}
+
+	var data = new google.visualization.DataTable();
+	data.addColumn({ type: "string", role: "domain", label: "Item type" });
+	data.addColumn({ type: "number", role: "data", label: "friendly" });
+	data.addColumn({ type: "number", role: "interval" });
+	data.addColumn({ type: "number", role: "interval" });
+	data.addColumn({ type: "number", role: "data", label: "enemy" });
+	data.addColumn({ type: "number", role: "interval" });
+	data.addColumn({ type: "number", role: "interval" });
+	data.addColumn({ type: "number", role: "data", label: "neutral" });
+	data.addColumn({ type: "number", role: "interval" });
+	data.addColumn({ type: "number", role: "interval" });
 
 	for(var itemType in itemTypes) {
 	    if(itemType === "_hack") {
 		continue;
 	    }
 
-	    chartData.push([
-		itemType,
-		(hacks["friendly"][itemType] || 0) / hacks["friendly"]["_hack"],
-		(hacks["enemy"][itemType] || 0) / hacks["enemy"]["_hack"],
-		(hacks["neutral"][itemType] || 0) / hacks["neutral"]["_hack"]
-	    ]);
+	    data.addRow([ itemType ].concat(
+		_itemsPerHackStat(hacks["friendly"], itemType),
+		_itemsPerHackStat(hacks["enemy"], itemType),
+		_itemsPerHackStat(hacks["neutral"], itemType)
+	    ));
 	}
 
 	var options = {
@@ -79,7 +127,7 @@ exports.itemsPerHack = function() {
 	};
 
 	var chart = new google.visualization.BarChart(document.getElementById('chart_itemsPerHack'));
-	chart.draw(google.visualization.arrayToDataTable(chartData), options);
+	chart.draw(data, options);
     });
 };
 
