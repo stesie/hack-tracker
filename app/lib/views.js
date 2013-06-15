@@ -138,13 +138,31 @@ exports.avgResultsOfHack = {
 		continue;
 	    }
 
-	    emit([ doc.hack.type, item.object, item.level - hackLevel ], item.quantity);
+	    // build key like R-1, R+0, X+2, etc.
+	    var key = item.object.substr(0, 1);
+	    var relLevel = item.level - hackLevel;
+
+	    if(relLevel >= 0) {
+		key += "+";
+	    }
+
+	    key += relLevel;
+
+	    emit([
+		require("views/lib/epochs").getEpochFromDoc(doc),
+		doc.hack.type,
+		key
+	    ], item.quantity);
 	}
 
-	emit([ doc.hack.type, '_hack', 0 ], 1);
+	emit([
+	    require("views/lib/epochs").getEpochFromDoc(doc),
+	    doc.hack.type,
+	    '_hack'
+	], 1);
     },
 
-    reduce: "_sum"
+    reduce: "_stats"
 };
 
 exports.hackPatterns = {

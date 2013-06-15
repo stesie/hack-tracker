@@ -58,8 +58,7 @@ function _itemsPerHackStat(hackData, itemType) {
     ];
 }
 
-
-exports.itemsPerHack = function() {
+function _renderItemsPerHackChart(viewName, vAxisTitle, divId) {
     var db = require('db').current();
     var options = { group: true };
     var epoch = $("#epoch-choice :selected").val();
@@ -69,11 +68,11 @@ exports.itemsPerHack = function() {
 	options.endkey = [ parseInt(epoch), "z" ];
     }
 
-    db.getView('hack-tracker', 'itemsPerHack', options, function(err, data) {
+    db.getView('hack-tracker', viewName, options, function(err, data) {
 	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
 	var itemTypes = {};
 
-	/* The data array is structured as follows:
+	/* The data array needs to be structured as follows:
 
 	   key[0] = epoch index
 	   key[1] = hack type (enemy/frienly)
@@ -123,13 +122,24 @@ exports.itemsPerHack = function() {
 	var options = {
 	    width: 900, height: 500,
 	    colors: [ 'blue', 'green', 'grey' ],
-            vAxis: { title: 'Item type' }
+            vAxis: { title: vAxisTitle }
 	};
 
-	var chart = new google.visualization.BarChart(document.getElementById('chart_itemsPerHack'));
+	var chart = new google.visualization.BarChart(document.getElementById(divId));
 	chart.draw(data, options);
     });
 };
+
+exports.itemsPerHack = function() {
+    _renderItemsPerHackChart(
+	"itemsPerHack",
+	"Item type",
+	"chart_itemsPerHack"
+    );
+};
+
+
+
 
 exports.itemcountPerHack = function() {
     var db = require('db').current();
@@ -364,44 +374,13 @@ exports.itemLevelsEmptySlots = function() {
 };
 
 exports.avgResultsOfHack = function() {
-    var db = require('db').current();
-    db.getView('hack-tracker', 'avgResultsOfHack', { group: true }, function(err, data) {
-	var chartData = [ [ "Item type", "friendly", "enemy", "neutral" ] ];
-	var hacks = { "friendly": {}, "enemy": {}, "neutral": {} };
-	var itemTypes = [ "R", "X", "C" ];
-
-	for(var i = 0; i < data.rows.length; i ++) {
-	    var key = data.rows[i].key[1] === '_hack' ? '_hack' :
-		(data.rows[i].key[1].substr(0, 1) +
-		 (data.rows[i].key[2] >= 0 ? '+' : '') +
-		 data.rows[i].key[2]);
-
-	    hacks[data.rows[i].key[0]][key] = data.rows[i].value;
-	}
-
-	for(var i = 0; i < itemTypes.length; i ++) {
-	    for(var j = -1; j < 3; j ++) {
-		var key = itemTypes[i] + (j >= 0 ? "+" : "") + j;
-
-		chartData.push([
-		    key,
-		    (hacks["friendly"][key] || 0) / hacks["friendly"]["_hack"],
-		    (hacks["enemy"][key] || 0) / hacks["enemy"]["_hack"],
-		    (hacks["neutral"][key] || 0) / hacks["neutral"]["_hack"]
-		]);
-	    }
-	}
-
-	var options = {
-	    width: 900, height: 500,
-	    colors: [ 'blue', 'green', 'grey' ],
-            vAxis: { title: 'Item type wrt. hack level' }
-	};
-
-	var chart = new google.visualization.BarChart(document.getElementById('chart_avgResultsOfHack'));
-	chart.draw(google.visualization.arrayToDataTable(chartData), options);
-    });
+    _renderItemsPerHackChart(
+	"avgResultsOfHack",
+	"Item type wrt. hack level",
+	"chart_avgResultsOfHack"
+    );
 };
+
 
 exports.hackPatterns = function() {
     var db = require('db').current();
