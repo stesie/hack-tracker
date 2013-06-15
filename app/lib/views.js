@@ -168,6 +168,7 @@ exports.avgResultsOfHack = {
 exports.hackPatterns = {
     map: function(doc) {
 	var resoSum = 0, xmpSum = 0, shieldSum = 0, keySum = 0;
+	var epoch = require("views/lib/epochs").getEpochFromDoc(doc);
 
 	for(var a in doc.hack.items) {
 	    var item = doc.hack.items[a];
@@ -185,18 +186,18 @@ exports.hackPatterns = {
 	    }
 	}
 
-	require("views/lib/permute").permute([ doc.hack.type ], {
+	require("views/lib/permute").permute([ doc.hack.type ], epoch, {
 	    "R": resoSum,
 	    "X": xmpSum,
 	});
 
-	require("views/lib/permute").permute([ doc.hack.type ], {
+	require("views/lib/permute").permute([ doc.hack.type ], epoch, {
 	    "R": resoSum,
 	    "X": xmpSum,
 	    "SK": shieldSum + keySum
 	});
 
-	require("views/lib/permute").permute([ doc.hack.type ], {
+	require("views/lib/permute").permute([ doc.hack.type ], epoch, {
 	    "R": resoSum,
 	    "X": xmpSum,
 	    "S": shieldSum,

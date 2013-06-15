@@ -8,7 +8,7 @@ function objectLength(obj) {
     return size;
 };
 
-function permute(prefix, data, recKey, recData) {
+function permute(prefix, epoch, data, recKey, recData) {
     recKey = recKey || "";
     recData = recData || [];
 
@@ -18,14 +18,14 @@ function permute(prefix, data, recKey, recData) {
 	delete sub[i];
 
 	if(objectLength(sub) === 0) {
-            emit(prefix.concat(subKey.substr(1), recData, data[i]), null)
+            emit(prefix.concat(subKey.substr(1), epoch, recData, data[i]), null)
 	}
 	else {
-            permute(prefix, sub, subKey, recData.concat(data[i]));
+            permute(prefix, epoch, sub, subKey, recData.concat(data[i]));
 	}
     }
 }
 
-exports.permute = function(prefix, data) {
-    permute(prefix, data);
+exports.permute = function(prefix, epoch, data) {
+    permute(prefix, epoch, data);
 };

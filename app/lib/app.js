@@ -68,14 +68,23 @@ exports.init = function() {
 	var firstDash = pattern.indexOf("-");
 	pattern = [ pattern.substr(0, firstDash), pattern.substr(firstDash + 1)];
 
-	require('db').current().getView("hack-tracker", "hackPatterns", {
+	var epoch = $("#epoch-choice :selected").val();
+	var options = {
 	    group: true,
-	    startkey: pattern,
-	    endkey: pattern.concat(9, 9, 9, 9)
-	}, function(err, data) {
+	}
+
+	if(epoch === "_all") {
+	    options.startkey = pattern.concat(0);
+	    options.endkey = pattern.concat(999, 9, 9, 9, 9);
+	} else {
+	    options.startkey = pattern.concat(parseInt(epoch));
+	    options.endkey = pattern.concat(parseInt(epoch), 9, 9, 9, 9);
+	}
+
+	require('db').current().getView("hack-tracker", "hackPatterns", options, function(err, data) {
 	    var totals = { _all: 0 };
 	    $.each(data.rows, function(i, row) {
-		var pattern = row.key.slice(2);
+		var pattern = row.key.slice(3);
 
 		for(; pattern.length; pattern.pop()) {
 		    var key = pattern.join("-");
