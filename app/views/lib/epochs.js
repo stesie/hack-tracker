@@ -9,5 +9,10 @@ exports.getEpochFromDoc = function(doc) {
         return 1;
     }
 
-    return 2;
+    if(doc.timestamp < 1370556000) {
+        /* before increased power cube drop rate */
+        return 2;
+    }
+
+    return 3;
 }
