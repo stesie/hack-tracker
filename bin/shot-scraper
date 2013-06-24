@@ -244,6 +244,12 @@ scrapeResults() {
 				quantity=$c
 				;;
 
+			Link)
+				object="Link Amp"
+				level=0
+				quantity=$c
+				;;
+
 			*)
 				#cp "$tempFile" /home/stesie/Projekte/hack-tracker/tessdata/training.lvl/$tempFile-$counter; counter=$[$counter + 1]
 				error "parse error, unknown a=$a b=$b"
