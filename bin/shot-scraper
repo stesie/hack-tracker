@@ -245,7 +245,7 @@ scrapeResults() {
 				;;
 
 			Link)
-				object="Link Amp"
+				object="Link Amplifier"
 				level=0
 				quantity=$c
 				;;
