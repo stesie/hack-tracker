@@ -14,5 +14,15 @@ exports.getEpochFromDoc = function(doc) {
         return 2;
     }
 
-    return 3;
+    if(doc.timestamp < 1371744000) {
+        /* before link amp drop */
+        return 3;
+    }
+
+    if(doc.timestamp < 1372348800) {
+        /* before drop of other new mods like multi-hack & heat sink */
+        return 4;
+    }
+
+    return 5;
 }
