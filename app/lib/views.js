@@ -134,7 +134,7 @@ exports.avgResultsOfHack = {
 	for(var a in doc.hack.items) {
 	    var item = doc.hack.items[a];
 
-	    if(!item.level) {
+	    if(!item.level || item.object === 'Media') {
 		continue;
 	    }
 
